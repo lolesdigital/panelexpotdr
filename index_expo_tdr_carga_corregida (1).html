@@ -1,0 +1,1505 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Expo TDR — Inscripción</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --negro: #000000;
+    --bg: #F7F7F7;
+    --card: #FFFFFF;
+    --celeste: #00C8DC;
+    --fucsia: #FF1D8E;
+    --amarillo: #E8CC00;
+    --blanco: #FFFFFF;
+    --text: #1A1A1A;
+    --text2: #777777;
+    --border: #E0E0E0;
+    --verde: #00B870;
+    --rojo: #FF1D8E;
+  }
+
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  /* NAV */
+  .nav {
+    background: var(--fucsia); padding: 0 1.25rem;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 58px; position: sticky; top: 0; z-index: 100;
+  }
+  .nav-logo { font-family: 'DM Serif Display', serif; font-size: 21px; }
+  .nav-logo .e { color: var(--celeste); }
+  .nav-logo .t { color: var(--amarillo); }
+  .nav-logo .sep { color: var(--fucsia); margin: 0 3px; font-size: 14px; }
+  .nav-tabs { display: flex; gap: 4px; }
+  .nav-tab { padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 500; cursor: pointer; color: rgba(255,255,255,0.5); border: none; background: none; transition: all 0.15s; }
+  .nav-tab.active { background: rgba(255,255,255,0.12); color: #fff; }
+  .nav-tab:hover:not(.active) { color: rgba(255,255,255,0.85); }
+
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* FORM PAGE */
+  .form-page { max-width: 500px; margin: 0 auto; padding: 1.75rem 1.25rem 4rem; }
+
+  .form-header { text-align: center; margin-bottom: 2rem; }
+  .form-header h1 { font-family: 'DM Serif Display', serif; font-size: 36px; margin-bottom: 4px; line-height: 1.1; }
+  .form-header h1 .e { color: var(--celeste); }
+  .form-header h1 .t { color: var(--amarillo); }
+  .form-header .sub { font-size: 13px; color: var(--text2); margin-bottom: 10px; }
+  .alias-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--fucsia); padding: 7px 16px; border-radius: 20px; font-size: 13px; color: #fff;
+  }
+  .alias-pill .al { color: var(--celeste); font-weight: 700; }
+  .alias-pill .sep { color: var(--fucsia); }
+
+  .form-card { background: var(--card); border-radius: 16px; border: 1px solid var(--border); padding: 1.25rem; margin-bottom: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+
+  .section-label { font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text2); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+  .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .section-label .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+
+  .field { margin-bottom: 1rem; }
+  .field:last-child { margin-bottom: 0; }
+  .field label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 5px; color: var(--text); }
+  .field label .req { color: var(--fucsia); margin-left: 2px; }
+  .field input[type=text], .field input[type=url], .field textarea, .field select {
+    width: 100%; padding: 10px 13px;
+    border: 1.5px solid var(--border); border-radius: 10px;
+    font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--text);
+    background: #fff; outline: none; transition: border-color 0.15s; appearance: none;
+  }
+  .field input:focus, .field textarea:focus, .field select:focus { border-color: var(--celeste); }
+  .field textarea { resize: vertical; min-height: 68px; }
+  .field .hint { font-size: 11px; color: var(--text2); margin-top: 4px; }
+
+  /* FECHAS GRID */
+  .fechas-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .fecha-btn {
+    border: 1.5px solid var(--border); border-radius: 10px; padding: 10px 8px;
+    cursor: pointer; text-align: center; background: #fff; transition: all 0.15s;
+  }
+  .fecha-btn:hover { border-color: var(--celeste); background: #f0fcfe; }
+  .fecha-btn.sel { border-color: var(--celeste); background: #e6f9fb; }
+  .fecha-mes { font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--celeste); margin-bottom: 2px; }
+  .fecha-dia { font-size: 16px; font-weight: 700; color: var(--text); }
+  .fecha-dow { font-size: 10px; color: var(--text2); margin-top: 1px; }
+  .fecha-btn.sel .fecha-dia { color: var(--celeste); }
+
+  /* TOGGLE */
+  .toggle-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .toggle-btn { padding: 10px 8px; border: 1.5px solid var(--border); border-radius: 10px; text-align: center; cursor: pointer; font-size: 13px; font-weight: 600; color: var(--text2); background: #fff; transition: all 0.15s; }
+  .toggle-btn:hover { border-color: var(--celeste); }
+  .toggle-btn.active-c { border-color: var(--celeste); color: var(--celeste); background: #e6f9fb; }
+  .toggle-btn.active-f { border-color: var(--fucsia); color: var(--fucsia); background: #fff0f7; }
+  .toggle-btn.active-a { border-color: var(--amarillo); color: #7a6600; background: #fffbe6; }
+
+  /* GASTRO */
+  .gastro-box { margin-top: 10px; display: flex; flex-direction: column; gap: 8px; }
+
+  /* CHECK */
+  .check-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1.5px solid var(--border); border-radius: 10px; cursor: pointer; background: #fff; transition: all 0.15s; }
+  .check-item:hover { border-color: var(--celeste); }
+  .check-item.checked { border-color: var(--celeste); background: #e6f9fb; }
+  .check-item input[type=checkbox] { width: 16px; height: 16px; accent-color: var(--celeste); flex-shrink: 0; }
+  .check-label { flex: 1; font-size: 13px; font-weight: 500; color: var(--text); }
+  .check-price { font-size: 12px; color: var(--text2); white-space: nowrap; font-weight: 600; }
+
+  /* UPLOAD */
+  .upload-box { margin-top: 8px; }
+  .upload-box label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 5px; color: var(--text); }
+  .upload-area { border: 2px dashed var(--border); border-radius: 12px; padding: 18px; text-align: center; cursor: pointer; background: #fafafa; transition: all 0.15s; position: relative; }
+  .upload-area:hover { border-color: var(--celeste); background: #f0fcfe; }
+  .upload-area.has-file { border-color: var(--verde); border-style: solid; background: #f0fdf7; }
+  .upload-area input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+  .upload-icon { font-size: 24px; margin-bottom: 5px; }
+  .upload-text { font-size: 12px; color: var(--text2); }
+  .upload-filename { font-size: 12px; color: var(--verde); font-weight: 700; margin-top: 3px; }
+
+  /* CHICAS */
+  .chicas-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; }
+  .chica-btn { border: 1.5px solid var(--border); border-radius: 12px; padding: 12px 6px; cursor: pointer; text-align: center; background: #fff; transition: all 0.15s; }
+  .chica-btn:hover { border-color: var(--fucsia); }
+  .chica-btn.sel { border-color: var(--fucsia); background: #fff0f7; }
+  .chica-avatar { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; margin: 0 auto 5px; }
+  .chica-name { font-size: 13px; font-weight: 600; color: var(--text); }
+
+  /* OPCIONES */
+  .opt-grid { display: flex; flex-direction: column; gap: 8px; }
+  .opt-item { border: 1.5px solid var(--border); border-radius: 12px; padding: 12px 14px; cursor: pointer; display: flex; align-items: center; gap: 12px; background: #fff; transition: all 0.15s; }
+  .opt-item:hover { border-color: var(--amarillo); }
+  .opt-item.sel { border-color: var(--amarillo); background: #fffbe6; }
+  .opt-dot { width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--border); flex-shrink: 0; transition: all 0.15s; display: flex; align-items: center; justify-content: center; }
+  .opt-item.sel .opt-dot { border-color: var(--amarillo); background: var(--amarillo); }
+  .opt-item.sel .opt-dot::after { content: ''; width: 6px; height: 6px; background: #fff; border-radius: 50%; }
+  .opt-info { flex: 1; }
+  .opt-name { font-size: 14px; font-weight: 700; color: var(--text); }
+  .opt-desc { font-size: 11px; color: var(--text2); margin-top: 2px; }
+  .opt-price { font-size: 16px; font-weight: 700; color: #7a6600; }
+
+  /* PAGO */
+  .pago-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+
+  /* RESUMEN */
+  .resumen { background: #f7f7f7; border-radius: 12px; padding: 14px 16px; border: 1px solid var(--border); }
+  .res-row { display: flex; justify-content: space-between; font-size: 13px; color: var(--text2); margin-bottom: 5px; }
+  .res-total { display: flex; justify-content: space-between; font-size: 16px; font-weight: 700; color: var(--text); border-top: 1px solid var(--border); margin-top: 8px; padding-top: 8px; }
+  .res-senia { display: flex; justify-content: space-between; font-size: 13px; color: var(--celeste); margin-top: 4px; font-weight: 700; }
+
+  /* INFO BOXES */
+  .info-box { background: #fffbe6; border-left: 3px solid var(--amarillo); border-radius: 0 8px 8px 0; padding: 8px 12px; font-size: 12px; color: #7a6600; }
+  .alert-box { background: #fff0f7; border-left: 3px solid var(--fucsia); border-radius: 0 8px 8px 0; padding: 8px 12px; font-size: 12px; color: #aa004a; }
+
+  /* BTN */
+  .btn-submit {
+    width: 100%; border: none; border-radius: 12px; padding: 16px;
+    font-family: 'DM Sans', sans-serif; font-size: 16px; font-weight: 700;
+    cursor: pointer; margin-top: 1.25rem; letter-spacing: 0.02em; transition: all 0.15s;
+    background: var(--fucsia); color: #fff;
+  }
+  .btn-submit:hover { opacity: 0.85; transform: translateY(-1px); }
+
+  /* SUCCESS */
+  .success-screen { text-align: center; padding: 3rem 1.5rem; max-width: 400px; margin: 0 auto; }
+  .success-circle { width: 72px; height: 72px; border-radius: 50%; margin: 0 auto 1.5rem; display: flex; align-items: center; justify-content: center; font-size: 36px; background: var(--fucsia); }
+  .success-screen h2 { font-family: 'DM Serif Display', serif; font-size: 26px; margin-bottom: 8px; }
+  .success-screen p { font-size: 14px; color: var(--text2); line-height: 1.6; }
+  .btn-nueva { display: inline-block; margin-top: 1.5rem; padding: 12px 28px; border: 1.5px solid var(--border); border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; background: #fff; color: var(--text); transition: all 0.15s; }
+  .btn-nueva:hover { border-color: var(--celeste); }
+
+  /* ADMIN */
+  .admin-page { max-width: 1000px; margin: 0 auto; padding: 1.5rem 1.25rem 4rem; }
+  .admin-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 10px; }
+  .admin-header h2 { font-family: 'DM Serif Display', serif; font-size: 24px; }
+  .btn-export { padding: 9px 18px; border: none; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; background: var(--fucsia); color: #fff; transition: opacity 0.15s; }
+  .btn-export:hover { opacity: 0.85; }
+
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(130px,1fr)); gap: 10px; margin-bottom: 1.25rem; }
+  .stat-card { background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
+  .stat-label { font-size: 10px; color: var(--text2); font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 5px; }
+  .stat-value { font-size: 26px; font-weight: 700; }
+  .stat-sub { font-size: 11px; color: var(--text2); margin-top: 2px; }
+
+  .rubros-card { background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem; margin-bottom: 1.25rem; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
+  .rubros-card h3 { font-size: 14px; font-weight: 700; margin-bottom: 10px; }
+  .rubros-grid { display: flex; flex-wrap: wrap; gap: 6px; }
+  .rubro-tag { padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+  .rubro-tag.tiene { background: #e6fdf3; color: #007a49; border: 1px solid #b3f0d6; }
+  .rubro-tag.falta { background: #fff0f7; color: #aa004a; border: 1px solid #ffb3d9; }
+
+  .filters { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+  .filter-btn { padding: 5px 13px; border-radius: 20px; font-size: 12px; font-weight: 600; cursor: pointer; border: 1.5px solid var(--border); background: #fff; color: var(--text2); transition: all 0.15s; }
+  .filter-btn.active { background: var(--fucsia); color: #fff; border-color: var(--fucsia); }
+
+  .table-wrap { overflow-x: auto; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
+  table { width: 100%; border-collapse: collapse; min-width: 900px; }
+  thead { background: var(--fucsia); }
+  thead th { padding: 11px 13px; text-align: left; font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.6); text-transform: uppercase; letter-spacing: 0.08em; white-space: nowrap; }
+  tbody tr { background: #fff; border-bottom: 1px solid var(--border); transition: background 0.1s; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: #f7f7f7; }
+  tbody tr.row-total { background: #f0fdf7; }
+  tbody tr.row-total:hover { background: #e6fdf3; }
+  tbody td { padding: 10px 13px; font-size: 13px; color: var(--text); }
+
+  .badge { display: inline-block; padding: 3px 9px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+  .b-verde { background: #e6fdf3; color: #007a49; }
+  .b-amarillo { background: #fffbe6; color: #7a6600; }
+  .b-gris { background: #f0f0f0; color: #666; }
+  .b-fucsia { background: #fff0f7; color: #aa004a; }
+  .b-celeste { background: #e6f9fb; color: #007a87; }
+
+  .empty-state { text-align: center; padding: 3rem; color: var(--text2); font-size: 14px; }
+  .empty-state .big { font-size: 40px; margin-bottom: 10px; }
+
+  @media (max-width: 480px) {
+    .stats-grid { grid-template-columns: repeat(2,1fr); }
+    .fechas-grid { grid-template-columns: repeat(2,1fr); }
+  }
+
+  /* PASSWORD MODAL */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0; z-index: 999;
+    background: rgba(0,0,0,0.45);
+    align-items: center; justify-content: center;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal-box {
+    background: #fff; border-radius: 20px; padding: 2rem 1.75rem;
+    width: 90%; max-width: 340px; text-align: center;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.18);
+  }
+  .modal-icon { font-size: 36px; margin-bottom: 0.75rem; }
+  .modal-title { font-family: 'DM Serif Display', serif; font-size: 22px; margin-bottom: 6px; color: var(--text); }
+  .modal-sub { font-size: 13px; color: var(--text2); margin-bottom: 1.25rem; }
+  .modal-input {
+    width: 100%; padding: 11px 14px; border: 1.5px solid var(--border);
+    border-radius: 10px; font-family: 'DM Sans', sans-serif; font-size: 15px;
+    text-align: center; letter-spacing: 0.15em; outline: none;
+    transition: border-color 0.15s; color: var(--text); background: #fff;
+    margin-bottom: 10px;
+  }
+  .modal-input:focus { border-color: var(--fucsia); }
+  .modal-input.error { border-color: var(--rojo); animation: shake 0.3s; }
+  .modal-btn {
+    width: 100%; padding: 13px; border: none; border-radius: 10px;
+    background: var(--fucsia); color: #fff; font-family: 'DM Sans', sans-serif;
+    font-size: 15px; font-weight: 700; cursor: pointer; transition: opacity 0.15s;
+  }
+  .modal-btn:hover { opacity: 0.88; }
+  .modal-error { font-size: 12px; color: var(--rojo); margin-top: 6px; min-height: 16px; }
+  @keyframes shake {
+    0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)}
+  }
+
+  /* WELCOME SCREEN */
+  .welcome-screen { max-width: 500px; margin: 0 auto; padding: 2rem 1.25rem; }
+  .welcome-card {
+    background: var(--card); border-radius: 16px; border: 1px solid var(--border);
+    padding: 1.75rem 1.5rem; margin-bottom: 12px; cursor: pointer;
+    display: flex; align-items: center; gap: 1rem;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06); transition: all 0.15s;
+  }
+  .welcome-card:hover { border-color: var(--fucsia); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+  .welcome-card .wc-icon { font-size: 36px; flex-shrink: 0; }
+  .welcome-card .wc-title { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+  .welcome-card .wc-desc { font-size: 13px; color: var(--text2); }
+
+  /* COMPLETAR PAGO */
+  .completar-page { max-width: 500px; margin: 0 auto; padding: 1.75rem 1.25rem 4rem; }
+
+  /* LOADING OVERLAY */
+  .loading-overlay {
+    display: none; position: fixed; inset: 0; z-index: 9999;
+    background: rgba(255,255,255,0.97);
+    align-items: center; justify-content: center; flex-direction: column;
+  }
+  .loading-overlay.show { display: flex; }
+  .loading-spinner {
+    width: 104px; height: 104px; border: 9px solid var(--border);
+    border-top-color: var(--fucsia); border-radius: 50%;
+    animation: spin 0.8s linear infinite; margin-bottom: 1.75rem;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-text { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+  .loading-sub { font-size: 12px; color: var(--text2); text-align: center; }
+
+  /* HELP BUTTON */
+  .help-btn {
+    position: fixed; bottom: 20px; right: 20px; z-index: 998;
+    height: 48px; border-radius: 24px; padding: 0 16px;
+    background: var(--fucsia); color: #fff;
+    border: none; font-size: 22px; font-weight: 700;
+    cursor: pointer; box-shadow: 0 4px 12px rgba(255,29,142,0.4);
+    display: flex; align-items: center; justify-content: center;
+    transition: transform 0.15s;
+  }
+  .help-btn:hover { transform: scale(1.1); }
+
+  /* HELP MODAL */
+  .help-overlay {
+    display: none; position: fixed; inset: 0; z-index: 999;
+    background: rgba(0,0,0,0.5);
+    align-items: flex-end; justify-content: center;
+  }
+  .help-overlay.show { display: flex; }
+  .help-box {
+    background: #fff; border-radius: 20px 20px 0 0;
+    padding: 1.5rem 1.25rem 2rem;
+    width: 100%; max-width: 500px;
+    max-height: 80vh; overflow-y: auto;
+  }
+  .help-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 1.25rem;
+  }
+  .help-title { font-family: 'DM Serif Display', serif; font-size: 20px; color: var(--text); }
+  .help-close {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: var(--bg); border: none; font-size: 18px;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .help-step {
+    display: flex; gap: 12px; margin-bottom: 14px; align-items: flex-start;
+  }
+  .help-num {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: var(--fucsia); color: #fff;
+    font-size: 13px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .help-text { font-size: 13px; color: var(--text); line-height: 1.6; }
+  .help-text strong { color: var(--fucsia); }
+
+  .tip-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 18px; height: 18px; border-radius: 50%;
+    background: var(--celeste); color: #fff;
+    font-size: 11px; font-weight: 700; cursor: pointer;
+    border: none; margin-left: 6px; vertical-align: middle;
+    flex-shrink: 0;
+  }
+  .tip-box {
+    display: none; background: #e6f9fb;
+    border-left: 3px solid var(--celeste);
+    border-radius: 0 8px 8px 0;
+    padding: 8px 12px; font-size: 12px;
+    color: var(--text); margin-top: 8px; line-height: 1.6;
+  }
+  .tip-box.show { display: block; }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-logo"><span class="e">Expo</span><span class="sep">·</span><span class="t">TDR</span></div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showPage('welcome')">Inscripción</button>
+  </div>
+</nav>
+
+
+<!-- PASSWORD MODAL -->
+<div class="modal-overlay" id="passwordModal">
+  <div class="modal-box">
+    <div class="modal-icon">🔐</div>
+    <div class="modal-title">Panel admin</div>
+    <div class="modal-sub">Ingresá la contraseña para acceder</div>
+    <input class="modal-input" type="password" id="adminPass" placeholder="••••••••"
+      onkeydown="if(event.key==='Enter') checkPass()">
+    <button class="modal-btn" onclick="checkPass()">Entrar</button>
+    <div class="modal-error" id="passError"></div>
+  </div>
+</div>
+
+
+<!-- WELCOME SCREEN -->
+<div class="page active" id="page-welcome">
+  <div class="welcome-screen">
+    <div class="form-header">
+      <h1><span class="e">Expo</span> <span class="t">TDR</span></h1>
+      <div class="sub">Inscripciones 2026</div>
+    </div>
+    <div style="border-left:3px solid var(--fucsia);background:var(--card);border-radius:0 8px 8px 0;padding:10px 12px;margin-bottom:16px;display:flex;align-items:flex-start;gap:10px">
+      <span style="font-size:15px;flex-shrink:0;margin-top:1px">⚠️</span>
+      <div>
+        <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:3px">Tené esto listo 👇</div>
+        <div style="font-size:12px;color:var(--text2);line-height:1.7">
+          📎 Comprobante de pago<br>
+          🍽️ Gastronómicas: libreta sanitaria + certificado del curso
+        </div>
+      </div>
+    </div>
+    <div style="font-size:12px;font-weight:600;color:var(--text2);text-align:center;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.06em">¿Qué querés hacer?</div>
+    <div class="welcome-card" onclick="showPage('form')">
+      <div class="wc-icon">🆕</div>
+      <div>
+        <div class="wc-title">Quiero anotarme</div>
+        <div class="wc-desc">Completá tus datos y reservá tu lugar</div>
+      </div>
+    </div>
+    <div class="welcome-card" onclick="showPage('completar')">
+      <div class="wc-icon">💰</div>
+      <div>
+        <div class="wc-title">Completar el pago de mi seña</div>
+        <div class="wc-desc">Ya me inscribí y quiero pagar el resto</div>
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:16px">
+      <button onclick="document.getElementById('helpModal').classList.add('show')" style="background:none;border:1.5px solid var(--fucsia);color:var(--fucsia);border-radius:20px;padding:8px 20px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer">? Ayuda — ¿cómo funciona?</button>
+    </div>
+  </div>
+</div>
+
+<!-- COMPLETAR PAGO -->
+<div class="page" id="page-completar">
+  <div class="completar-page">
+    <div class="form-header">
+      <h1><span class="e">Expo</span> <span class="t">TDR</span></h1>
+      <div class="sub">Completar pago</div>
+      <div class="alias-pill">Alias: <span class="al">tdr2026</span><span class="sep">·</span>Romina Prado / Lemon</div>
+    </div>
+
+    <div id="completarContent">
+      <div class="form-card">
+        <div class="section-label"><span class="dot" style="background:var(--celeste)"></span>Tus datos</div>
+        <div class="field">
+          <label>Nombre y apellido <span class="req">*</span></label>
+          <input type="text" id="cp-nombre" placeholder="El mismo que pusiste al inscribirte">
+        </div>
+        <div class="field">
+          <label>Nombre del emprendimiento <span class="req">*</span></label>
+          <input type="text" id="cp-emprendimiento" placeholder="El mismo que pusiste al inscribirte">
+        </div>
+        <button type="button" id="btn-buscar" onclick="buscarEmprendedora()" style="width:100%;margin-top:8px;padding:10px;border:1.5px solid var(--celeste);border-radius:10px;background:#fff;color:var(--celeste);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer">Buscar mi inscripción 🔍</button>
+        <div id="info-emprendedora" style="display:none;margin-top:10px;background:#e6f9fb;border-radius:10px;padding:12px 14px;font-size:13px;line-height:1.8"></div>
+        <div id="info-no-encontrada" style="display:none;margin-top:10px" class="alert-box">❌ No encontramos tu inscripción. Verificá el nombre y el emprendimiento.</div>
+      </div>
+
+
+
+      <div class="form-card">
+        <div class="section-label"><span class="dot" style="background:var(--fucsia)"></span>Comprobante</div>
+        <div class="info-box" style="margin-bottom:10px">📤 Alias: <strong>tdr2026</strong> · Romina Prado / Lemon</div>
+        <div class="upload-area" id="uploadAreaCP">
+          <input type="file" id="f-comprobante-cp" accept="image/*" onchange="handleFileCP(this)">
+          <div class="upload-icon">📎</div>
+          <div class="upload-text">Elegí una foto o captura (JPG/PNG, no PDF)</div>
+          <div class="upload-filename" id="upload-name-cp"></div>
+        </div>
+      </div>
+
+      <button class="btn-submit" onclick="submitCompletarPago()"><span id="btn-cp-text">Confirmar →</span></button>
+      <div style="text-align:center;margin-top:12px">
+        <span style="font-size:13px;color:var(--text2);cursor:pointer" onclick="showPage('welcome')">← Volver</span>
+      </div>
+    </div>
+
+    <div class="success-screen" id="successCP" style="display:none">
+      <div class="success-circle">✓</div>
+      <h2>¡Pago registrado!</h2>
+      <p id="success-cp-msg"></p>
+      <button class="btn-nueva" onclick="resetCP()">Volver al inicio</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== FORM ===== -->
+<div class="page" id="page-form">
+  <div class="form-page">
+    <div id="formContent">
+
+      <div class="form-header">
+        <h1><span class="e">Expo</span> <span class="t">TDR</span></h1>
+        <div class="sub">Completá tu inscripción para reservar tu lugar</div>
+        <div class="alias-pill">Alias: <span class="al">tdr2026</span><span class="sep">·</span>Romina Prado / Lemon</div>
+      </div>
+
+      <!-- DATOS PERSONALES -->
+      <div class="form-card">
+        <div class="section-label"><span class="dot" style="background:var(--celeste)"></span>Tus datos</div>
+        <div class="field">
+          <label>Nombre y apellido <span class="req">*</span></label>
+          <input type="text" id="f-nombre" placeholder="Tu nombre completo">
+        </div>
+        <div class="field">
+          <label>Nombre del emprendimiento <span class="req">*</span></label>
+          <input type="text" id="f-emprendimiento" placeholder="¿Cómo se llama tu emprendimiento?">
+        </div>
+        <div class="field">
+          <label>Rubro <span class="req">*</span></label>
+          <input type="text" id="f-rubro" placeholder="Ej: Indumentaria, Plantas, Repostería...">
+        </div>
+        <div class="field">
+          <label>WhatsApp / Teléfono <span class="req">*</span></label>
+          <input type="tel" id="f-telefono" placeholder="Ej: 11 1234-5678">
+        </div>
+        <div class="field">
+          <label>Mail <span class="req">*</span></label>
+          <input type="email" id="f-mail" placeholder="tu@mail.com">
+        </div>
+        <div class="field">
+          <label>Instagram</label>
+          <input type="text" id="f-instagram" placeholder="@tuemprendimiento">
+          <div class="hint">Sin el @ si querés, pero con @ mejor 😊</div>
+        </div>
+        <div class="field">
+          <label>Otra red o link</label>
+          <input type="text" id="f-redes" placeholder="Facebook, TikTok, web, WhatsApp...">
+        </div>
+      </div>
+
+      <!-- FECHA -->
+      <div class="form-card">
+        <div class="section-label"><span class="dot" style="background:var(--fucsia)"></span>¿Para qué fecha querés anotarte? <span style="color:var(--fucsia);font-size:10px;margin-left:2px">*</span><button class="tip-btn" onclick="toggleTip('tip-fecha')">?</button></div><div class="tip-box" id="tip-fecha">Tocá el recuadro de la fecha a la que querés ir — tiene que quedar resaltado en celeste. <strong>Importante: tenés que seleccionar una fecha para continuar.</strong> Ej: si querés ir el 12 de septiembre, tocá ese recuadro.</div>
+        <div class="fechas-grid" id="fechas-grid"></div>
+      </div>
+
+      <!-- GASTRONÓMICO -->
+      <div class="form-card">
+        <div class="section-label"><span class="dot" style="background:var(--amarillo)"></span>¿Tu rubro es gastronómico? <span style="color:var(--fucsia);font-size:10px;margin-left:2px">*</span><button class="tip-btn" onclick="toggleTip('tip-gastro')">?</button></div><div class="tip-box" id="tip-gastro">Si vendés comida, bebidas, repostería, pochoclos, etc. → elegí <strong>Sí</strong>. Si vendés ropa, accesorios, plantas u otros → elegí <strong>No</strong>. Ej: churros, tortas, sushi = gastronómico ✅</div>
+        <div class="toggle-row">
+          <div class="toggle-btn active-c" id="gastro-no" onclick="setGastro(false)">No</div>
+          <div class="toggle-btn" id="gastro-si" onclick="setGastro(true)">Sí, es gastro</div>
+        </div>
+        <div id="gastro-extra" style="display:none; margin-top:10px">
+          <div class="gastro-box">
+            <div class="check-item" id="ci-libreta" onclick="toggleLibreta()">
+              <input type="checkbox" id="libreta" onclick="event.stopPropagation()">
+              <span class="check-label">Tengo libreta sanitaria vigente</span>
+            </div>
+            <div id="libreta-upload-box" style="display:none">
+              <div class="upload-box">
+                <label>Foto de la libreta sanitaria <span style="color:var(--fucsia)">*</span><button class="tip-btn" onclick="toggleTip('tip-libreta')">?</button></label><div class="tip-box" id="tip-libreta">Tocá el recuadro punteado para adjuntar la foto. Podés sacar una foto con la cámara o elegir una imagen de tu galería. <strong>Esperá que diga "✓ nombre del archivo" antes de continuar</strong> — eso significa que cargó bien.</div>
+                <div class="upload-area" id="uploadAreaLibreta">
+                  <input type="file" id="f-libreta" accept="image/*,.pdf" onchange="handleFileLib(this)">
+                  <div class="upload-icon">🪪</div>
+                  <div class="upload-text">Tocá para adjuntar la foto</div>
+                  <div class="upload-filename" id="upload-name-libreta"></div>
+                </div>
+              </div>
+            </div>
+            <div class="check-item" id="ci-curso" onclick="toggleCurso()">
+              <input type="checkbox" id="curso" onclick="event.stopPropagation()">
+              <span class="check-label">Tengo curso de manipulación de alimentos</span>
+            </div>
+            <div id="curso-upload-box" style="display:none">
+              <div class="upload-box" style="margin-top:6px">
+                <label>Foto del curso de manipulación de alimentos <span style="color:var(--fucsia)">*</span></label>
+                <div class="upload-area" id="uploadAreaCurso">
+                  <input type="file" id="f-curso" accept="image/*,.pdf" onchange="handleFileCurso(this)">
+                  <div class="upload-icon">📋</div>
+                  <div class="upload-text">Tocá para adjuntar el certificado</div>
+                  <div class="upload-filename" id="upload-name-curso"></div>
+                </div>
+              </div>
+            </div>
+            <div id="gastro-warn" class="alert-box" style="display:none">❌ Ambos documentos son obligatorios para participar con rubro gastronómico.</div>
+            <div class="info-box" id="gastro-info">⚠️ Para rubros gastronómicos necesitás libreta sanitaria vigente y curso de manipulación de alimentos.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- QUIÉN CONVOCÓ -->
+      <div class="form-card">
+        <div class="section-label"><span class="dot" style="background:var(--fucsia)"></span>¿Con quién hablaste? <span style="color:var(--fucsia);font-size:10px;margin-left:2px">*</span><button class="tip-btn" onclick="toggleTip('tip-chica')">?</button></div><div class="tip-box" id="tip-chica">Seleccioná la chica que te contactó o con quien acordaste tu inscripción. <strong>Importante: tocá su nombre para que quede seleccionado</strong> — tiene que quedar resaltado en rosa. Ej: si fue Romi quien te escribió, tocá "Romi".</div>
+        <div class="chicas-grid">
+          <div class="chica-btn" id="chica-0" onclick="selectChica(0)">
+            <div class="chica-avatar" style="background:#fff0f7;color:#aa004a">Ro</div>
+            <div class="chica-name">Romi</div>
+          </div>
+          <div class="chica-btn" id="chica-1" onclick="selectChica(1)">
+            <div class="chica-avatar" style="background:#e6f9fb;color:#007a87">Ni</div>
+            <div class="chica-name">Nina</div>
+          </div>
+          <div class="chica-btn" id="chica-2" onclick="selectChica(2)">
+            <div class="chica-avatar" style="background:#fffbe6;color:#7a6600">Pa</div>
+            <div class="chica-name">Pame</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- OPCIÓN -->
+      <div class="form-card">
+        <div class="section-label"><span class="dot" style="background:var(--amarillo)"></span>Opción elegida <span style="color:var(--fucsia);font-size:10px;margin-left:2px">*</span><button class="tip-btn" onclick="toggleTip('tip-opcion')">?</button></div><div class="tip-box" id="tip-opcion">Usá los botones <strong>+</strong> para agregar y <strong>−</strong> para quitar. <strong>Tenés que elegir al menos 1.</strong> Ej: si querés 1 tablón, tocá el + de "Mesa/Tablón" hasta que diga 1. El precio se actualiza solo.</div>
+        <div style="font-size:11px;color:var(--text2);margin-bottom:10px">Podés elegir hasta 3 unidades de cada opción. El precio se calcula por unidad.</div>
+        <div class="opt-grid">
+
+          <div class="opt-item" id="op-0" style="flex-direction:column;align-items:stretch;gap:8px">
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              <div class="opt-info">
+                <div class="opt-name">Espacio</div>
+                <div class="opt-desc">Hasta 2mts de frente · incluye 1 silla</div>
+              </div>
+              <div class="opt-price" id="op-0-price">$20.000</div>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              <div style="font-size:12px;color:var(--text2)">Cantidad (máx. 3)</div>
+              <div style="display:flex;align-items:center;gap:10px">
+                <button onclick="event.stopPropagation();cambiarCantidad(0,-1)" style="width:28px;height:28px;border-radius:50%;border:1.5px solid var(--border);background:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text)">−</button>
+                <span id="cant-0" style="font-size:15px;font-weight:700;min-width:16px;text-align:center">0</span>
+                <button onclick="event.stopPropagation();cambiarCantidad(0,1)" style="width:28px;height:28px;border-radius:50%;border:1.5px solid var(--border);background:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text)">+</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="opt-item" id="op-1" style="flex-direction:column;align-items:stretch;gap:8px">
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              <div class="opt-info">
+                <div class="opt-name">Mesa Redonda</div>
+                <div class="opt-desc">1,40m de diámetro · incluye 1 silla</div>
+              </div>
+              <div class="opt-price" id="op-1-price">$22.000</div>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              <div style="font-size:12px;color:var(--text2)">Cantidad (máx. 3)</div>
+              <div style="display:flex;align-items:center;gap:10px">
+                <button onclick="event.stopPropagation();cambiarCantidad(1,-1)" style="width:28px;height:28px;border-radius:50%;border:1.5px solid var(--border);background:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text)">−</button>
+                <span id="cant-1" style="font-size:15px;font-weight:700;min-width:16px;text-align:center">0</span>
+                <button onclick="event.stopPropagation();cambiarCantidad(1,1)" style="width:28px;height:28px;border-radius:50%;border:1.5px solid var(--border);background:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text)">+</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="opt-item" id="op-2" style="flex-direction:column;align-items:stretch;gap:8px">
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              <div class="opt-info">
+                <div class="opt-name">Mesa / Tablón</div>
+                <div class="opt-desc">Aprox. 2mts de largo · incluye 1 silla</div>
+              </div>
+              <div class="opt-price" id="op-2-price">$27.000</div>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              <div style="font-size:12px;color:var(--text2)">Cantidad (máx. 3)</div>
+              <div style="display:flex;align-items:center;gap:10px">
+                <button onclick="event.stopPropagation();cambiarCantidad(2,-1)" style="width:28px;height:28px;border-radius:50%;border:1.5px solid var(--border);background:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text)">−</button>
+                <span id="cant-2" style="font-size:15px;font-weight:700;min-width:16px;text-align:center">0</span>
+                <button onclick="event.stopPropagation();cambiarCantidad(2,1)" style="width:28px;height:28px;border-radius:50%;border:1.5px solid var(--border);background:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text)">+</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ADICIONALES -->
+      <div class="form-card">
+        <div class="section-label"><span class="dot" style="background:var(--text2)"></span>Adicionales<button class="tip-btn" onclick="toggleTip('tip-adics')">?</button></div><div class="tip-box" id="tip-adics">Los adicionales son opcionales. <strong>Espacio extra</strong>: 60cm más de frente para tu stand (+$10.000). <strong>Silla adicional</strong>: si necesitás más de 1 silla (+$1.000 c/u). Ej: si vas a necesitar 2 sillas en total, agregá 1 silla adicional.</div>
+
+        <div class="opt-item" style="flex-direction:column;align-items:stretch;gap:8px;margin-bottom:8px">
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <div class="opt-info">
+              <div class="opt-name">Adicional de espacio</div>
+              <div class="opt-desc">+60cm extra</div>
+            </div>
+            <div class="opt-price">+$10.000</div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <div style="font-size:12px;color:var(--text2)">Cantidad (máx. 3)</div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <button onclick="cambiarAdicional('espacio',-1)" style="width:28px;height:28px;border-radius:50%;border:1.5px solid var(--border);background:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text)">−</button>
+              <span id="cant-espacio" style="font-size:15px;font-weight:700;min-width:16px;text-align:center">0</span>
+              <button onclick="cambiarAdicional('espacio',1)" style="width:28px;height:28px;border-radius:50%;border:1.5px solid var(--border);background:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text)">+</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="opt-item" style="flex-direction:column;align-items:stretch;gap:8px">
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <div class="opt-info">
+              <div class="opt-name">Silla adicional</div>
+              <div class="opt-desc">Pidiéndola con anticipación</div>
+            </div>
+            <div class="opt-price">+$1.000</div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <div style="font-size:12px;color:var(--text2)">Cantidad (máx. 3)</div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <button onclick="cambiarAdicional('silla',-1)" style="width:28px;height:28px;border-radius:50%;border:1.5px solid var(--border);background:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text)">−</button>
+              <span id="cant-silla" style="font-size:15px;font-weight:700;min-width:16px;text-align:center">0</span>
+              <button onclick="cambiarAdicional('silla',1)" style="width:28px;height:28px;border-radius:50%;border:1.5px solid var(--border);background:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text)">+</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PAGO -->
+      <div class="form-card">
+        <div class="section-label"><span class="dot" style="background:var(--fucsia)"></span>Pago <span style="color:var(--fucsia);font-size:10px;margin-left:2px">*</span><button class="tip-btn" onclick="toggleTip('tip-pago')">?</button></div><div class="tip-box" id="tip-pago">Elegí cómo pagaste y adjuntá la foto del comprobante. <strong>"Envié una seña"</strong>: si mandaste una parte del total → escribí cuánto mandaste. <strong>"Pagué el total"</strong>: si mandaste todo el monto. Ej: total $28.000, mandaste $14.000 → elegí "Envié una seña" y escribí 14000.</div>
+        <div class="pago-row">
+          <div class="toggle-btn" id="pago-senia" onclick="setPago('senia')">Envié una seña</div>
+          <div class="toggle-btn" id="pago-total" onclick="setPago('total')">Pagué el total</div>
+        </div>
+        <div id="monto-senia-box" style="display:none;margin-top:10px">
+          <label style="display:block;font-size:13px;font-weight:600;margin-bottom:5px;color:var(--text)">¿Cuánto enviaste de seña? <span style="color:var(--fucsia)">*</span></label>
+          <input type="number" id="f-monto-senia" placeholder="Ej: 10000" oninput="updateResumen()" style="width:100%;padding:10px 13px;border:1.5px solid var(--border);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);background:#fff;outline:none">
+        </div>
+
+        <div id="resumen-pago" style="display:none">
+          <div class="resumen">
+            <div class="res-row"><span>Opción</span><span id="res-op">—</span></div>
+            <div class="res-row" id="res-esp-row" style="display:none"><span>Adicional espacio</span><span>+$10.000</span></div>
+            <div class="res-row" id="res-sil-row" style="display:none"><span>Silla adicional</span><span>+$1.000</span></div>
+            <div class="res-total"><span>Total</span><span id="res-total">$0</span></div>
+            <div class="res-senia" id="res-senia-row" style="display:none">
+              <span id="res-senia-lbl"></span><span id="res-senia-val"></span>
+            </div>
+          </div>
+        </div>
+        <div id="comprobante-box" style="margin-top:12px">
+          <div class="info-box" style="margin-bottom:8px">📤 Alias: <strong>tdr2026</strong> · Romina Prado / Lemon</div>
+          <div class="upload-box">
+            <label>Comprobante de pago <span style="color:var(--fucsia)">*</span><button class="tip-btn" onclick="toggleTip('tip-comprobante')">?</button></label><div class="tip-box" id="tip-comprobante">Tocá el recuadro punteado y adjuntá la captura de pantalla de tu transferencia (Mercado Pago, Lemon, banco, etc). <strong>⏳ Puede tardar unos segundos en subirse — no cierres la pantalla hasta que aparezca el mensaje de éxito.</strong></div>
+            <div class="upload-area" id="uploadArea">
+              <input type="file" id="f-comprobante" accept="image/*,.pdf" onchange="handleFileComp(this)">
+              <div class="upload-icon">📎</div>
+              <div class="upload-text">Tocá para adjuntar la captura del pago</div>
+              <div class="upload-filename" id="upload-name"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- OBS -->
+      <div class="form-card">
+        <div class="section-label"><span class="dot" style="background:var(--text2)"></span>Observaciones</div>
+        <div class="field">
+          <textarea id="f-obs" placeholder="¿Algo que quieras aclarar?"></textarea>
+        </div>
+      </div>
+
+      <button class="btn-submit" onclick="submitForm()"><span id="btn-submit-text">Enviar inscripción →</span></button>
+    </div>
+
+    <!-- SUCCESS -->
+    <div class="success-screen" id="successContent" style="display:none">
+      <!-- Ícono pendiente -->
+      <div style="width:72px;height:72px;border-radius:50%;background:#FFF3CD;border:2px solid #F4B942;display:flex;align-items:center;justify-content:center;font-size:36px;margin:0 auto 1rem">⏳</div>
+      <h2 style="color:var(--text);font-size:22px;margin-bottom:4px">¡Casi listo!</h2>
+      <div style="display:inline-block;background:#FFF3CD;color:#7a5a00;font-size:13px;font-weight:700;padding:4px 14px;border-radius:20px;margin-bottom:1rem;border:1px solid #F4B942">Tu lugar está PENDIENTE ⏳</div>
+      <p id="success-msg" style="font-size:13px;color:var(--text2);margin-bottom:1.25rem"></p>
+
+      <!-- Pasos -->
+      <div style="background:#fff;border:1px solid var(--border);border-radius:14px;padding:1rem 1.25rem;margin-bottom:1rem;text-align:left">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+          <div style="width:28px;height:28px;border-radius:50%;background:#e6fdf3;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">✅</div>
+          <div>
+            <div style="font-size:13px;font-weight:600;color:var(--text)">Paso 1 completo</div>
+            <div style="font-size:12px;color:var(--text2)">Formulario enviado correctamente</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="width:28px;height:28px;border-radius:50%;background:#FFF3CD;border:1.5px solid #F4B942;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">⏳</div>
+          <div>
+            <div style="font-size:13px;font-weight:600;color:var(--fucsia)">Paso 2 pendiente — falta esto para confirmar</div>
+            <div style="font-size:12px;color:var(--text2)">Mandá el comprobante de pago por WhatsApp</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- WhatsApp -->
+      <div id="wa-box" style="background:#fff;border:1.5px solid var(--fucsia);border-radius:14px;padding:1rem 1.25rem;text-align:left">
+        <div style="font-size:13px;font-weight:700;color:var(--fucsia);margin-bottom:6px">⚠️ Este paso es OBLIGATORIO para confirmar tu inscripción</div>
+        <div id="wa-instrucciones-top" style="font-size:13px;color:var(--text2);margin-bottom:8px">Tocá el botón de abajo — te lleva directo a WhatsApp con todos tus datos listos para enviar a <strong id="wa-chica-nombre"></strong>.</div>
+        <div id="wa-numero" style="display:none"></div>
+        <a id="wa-link" href="#" target="_blank" style="display:block;background:#25D366;color:#fff;border-radius:10px;padding:13px;text-align:center;font-weight:700;font-size:15px;text-decoration:none">
+          💬 Abrir WhatsApp y confirmar →
+        </a>
+      </div>
+
+      <button class="btn-nueva" onclick="resetForm()" style="margin-top:1.25rem">Nueva inscripción</button>
+    </div>
+  </div>
+</div>
+
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+let cpTipoPago = null;
+let cpDatos = null;
+
+async function buscarEmprendedora(){
+  const nombre = document.getElementById('cp-nombre').value.trim();
+  const emprendimiento = document.getElementById('cp-emprendimiento').value.trim();
+  if(!nombre || !emprendimiento){ alert('Ingresá tu nombre y el nombre del emprendimiento'); return; }
+  cpDatos=null;
+
+  const SHEET_URL = 'https://script.google.com/macros/s/AKfycbx7Q4t5txOnLkAtUWYzPhyuAQXlYM2XT94dDwq3-2pderqq9kcf4tZeT_nY4kiQQ5Ib/exec';
+  const url = SHEET_URL + '?action=buscar&nombre='+encodeURIComponent(nombre)+'&emprendimiento='+encodeURIComponent(emprendimiento);
+
+  mostrarCargaExpo("Buscando tu inscripción...", "Estamos consultando tus datos. Por favor, esperá.");
+  try {
+    const res = await fetch(url);
+    const data = await res.json();
+    if(data.encontrado){
+      cpDatos = data;
+      const fmt = n => '$'+Number(n).toLocaleString('es-AR');
+      const pagoInfo = data.pagoTotal==='Sí'
+        ? '✅ <strong>¡Ya pagaste todo!</strong>'
+        : '💰 Seña pagada: <strong>'+fmt(data.senia1)+'</strong> · Te resta: <strong>'+fmt(data.resto)+'</strong>';
+      document.getElementById('info-emprendedora').innerHTML =
+        '👋 Hola <strong>'+data.nombre+'</strong>!<br>'+
+        '📦 '+data.opcion+' · Fecha: '+data.fecha+'<br>'+
+        '💵 Total: <strong>'+fmt(data.total)+'</strong><br>'+
+        pagoInfo;
+      document.getElementById('info-emprendedora').style.display='block';
+      document.getElementById('info-no-encontrada').style.display='none';
+    } else {
+      cpDatos = null;
+      document.getElementById('info-emprendedora').style.display='none';
+      document.getElementById('info-no-encontrada').style.display='block';
+    }
+  } catch(err) {
+    alert('Error al buscar. Intentá de nuevo.');
+  } finally { ocultarCargaExpo(); }
+}
+
+
+function setCPPago(tipo){
+  cpTipoPago = tipo;
+  document.getElementById('cp-pago-senia').className='toggle-btn'+(tipo==='senia'?' active-f':'');
+  document.getElementById('cp-pago-total').className='toggle-btn'+(tipo==='total'?' active-c':'');
+  document.getElementById('cp-monto-box').style.display=tipo==='senia'?'block':'none';
+}
+
+function mostrarCargaExpo(titulo, detalle){
+  document.getElementById('loading-text').textContent = titulo;
+  document.getElementById('loading-sub').textContent = detalle || 'No cierres esta pantalla hasta que termine.';
+  document.getElementById('loadingOverlay').classList.add('show');
+}
+function ocultarCargaExpo(){ document.getElementById('loadingOverlay').classList.remove('show'); }
+function handleFileCP(input){
+  const f=input.files[0];
+  const name=document.getElementById('upload-name-cp');
+  const area=document.getElementById('uploadAreaCP');
+  if(!f){name.textContent='';area.classList.remove('has-file');return;}
+  if(!f.type.startsWith('image/')){
+    input.value='';name.textContent='';area.classList.remove('has-file');
+    alert('Para completar el pago, adjuntá una imagen del comprobante (JPG, PNG o captura de pantalla). El servicio actual no admite PDF.');return;
+  }
+  name.textContent='✓ '+f.name;area.classList.add('has-file');
+}
+async function submitCompletarPago(){
+  const nombre=document.getElementById('cp-nombre').value.trim();
+  const emprendimiento=document.getElementById('cp-emprendimiento').value.trim();
+  const file=document.getElementById('f-comprobante-cp').files[0];
+  if(!nombre||!emprendimiento){alert('Completá tu nombre y emprendimiento');return;}
+  if(!cpDatos || !cpDatos.encontrado){alert('Primero tocá «Buscar mi inscripción» y esperá a que aparezcan tus datos.');return;}
+  if(!file){alert('Adjuntá una imagen del comprobante del pago');return;}
+  if(!file.type.startsWith('image/')){alert('Adjuntá una imagen JPG o PNG, no un PDF.');return;}
+  const btn=document.querySelector('#completarContent .btn-submit');
+  btn.disabled=true;
+  document.getElementById('btn-cp-text').textContent='Cargando...';
+  mostrarCargaExpo('Subiendo tu comprobante...', 'Estamos guardando la imagen. Puede tardar unos segundos; no cierres ni actualices esta página.');
+  try {
+    const comprobanteUrl=await Promise.race([
+      uploadToDrive(file,nombre+'_pago_final_'+file.name),
+      new Promise((_,reject)=>setTimeout(()=>reject(new Error('La carga tardó demasiado')),45000))
+    ]);
+    if(!comprobanteUrl) throw new Error('No se pudo subir la imagen. Probá con una captura JPG o PNG más pequeña.');
+    mostrarCargaExpo('Registrando tu pago...', 'Ya recibimos la imagen. Estamos enviando los datos de tu pago.');
+    const SHEET_URL_CP='https://script.google.com/macros/s/AKfycbx7Q4t5txOnLkAtUWYzPhyuAQXlYM2XT94dDwq3-2pderqq9kcf4tZeT_nY4kiQQ5Ib/exec';
+    const params=[
+      'action=completar','nombre='+encodeURIComponent(nombre),
+      'emprendimiento='+encodeURIComponent(emprendimiento),
+      'tipoPago=total','comprobanteUrl='+encodeURIComponent(comprobanteUrl),
+      'fila='+encodeURIComponent(cpDatos.fila||''),
+      'hoja='+encodeURIComponent(cpDatos.hoja||'')
+    ].join('&');
+    // no-cors no permite leer la confirmación de Google: informar envío, no verificación.
+    await fetch(SHEET_URL_CP+'?'+params,{mode:'no-cors'});
+    document.getElementById('success-cp-msg').textContent=emprendimiento+' · Comprobante enviado. La organización verificará el pago.';
+    document.getElementById('completarContent').style.display='none';
+    document.getElementById('successCP').style.display='block';
+  } catch(err){
+    alert('No pudimos completar el envío: '+err.message+'\nTu comprobante no quedó confirmado. Volvé a intentar.');
+  } finally {
+    ocultarCargaExpo();btn.disabled=false;
+    document.getElementById('btn-cp-text').textContent='Confirmar →';
+  }
+}
+
+function toggleTip(id){
+  const el=document.getElementById(id);
+  el.classList.toggle('show');
+}
+
+function resetCP(){
+  cpTipoPago=null;
+  cpDatos=null;
+  document.getElementById('cp-nombre').value='';
+  document.getElementById('cp-emprendimiento').value='';
+  document.getElementById('f-comprobante-cp').value='';
+  document.getElementById('upload-name-cp').textContent='';
+  document.getElementById('uploadAreaCP').classList.remove('has-file');
+  document.getElementById('btn-cp-text').textContent='Confirmar pago final →';
+  document.getElementById('completarContent').style.display='block';
+  document.getElementById('successCP').style.display='none';
+  showPage('welcome');
+}
+</script>
+<script>
+const FECHAS = [
+  {mes:'Noviembre',dia:8,dow:'Domingo', precioEspacio:20000, precioMesaRedonda:25000, precioTablon:28000},
+  {mes:'Noviembre',dia:14,dow:'Sábado', precioEspacio:20000, precioMesaRedonda:25000, precioTablon:28000},
+  {mes:'Diciembre',dia:12,dow:'Sábado', precioEspacio:20000, precioMesaRedonda:25000, precioTablon:28000},
+  {mes:'Diciembre',dia:19,dow:'Sábado', precioEspacio:20000, precioMesaRedonda:25000, precioTablon:28000},
+];
+
+const RUBROS_REF = ["Indumentaria","Calzado","Accesorios / Bijouterie","Cosmética / Belleza","Plantas / Jardinería","Juguetes / Juegos","Gastronomía","Repostería / Pastelería","Artesanías","Decoración / Hogar","Libros / Papelería","Mascotas","Tejidos / Textiles","Arte / Cuadros","Velas / Aromaterapia","Ropa Infantil"];
+const PRECIOS_BASE = [20000,22000,27000];
+let PRECIOS = [...PRECIOS_BASE];
+const OPCIONES = ["Espacio","Mesa Redonda","Mesa/Tablón"];
+const CHICAS = ["Romi","Nina","Pame"];
+const CHICAS_WA = {
+  "Romi": "5491131911263",
+  "Nina": "5491136585579",
+  "Pame": "5491155806197"
+};
+
+let esGastro=false, selOp=-1, selChica=-1, tipoPago=null, selFecha=-1;
+let cantidades = [0,0,0];
+let cantEspacio = 0;
+let cantSilla = 0;
+
+// Build fecha grid
+document.getElementById('fechas-grid').innerHTML = FECHAS.map((f,i)=>`
+  <div class="fecha-btn" id="fecha-${i}" onclick="selectFecha(${i})">
+    <div class="fecha-mes">${f.mes}</div>
+    <div class="fecha-dia">${f.dia}</div>
+    <div class="fecha-dow">${f.dow}</div>
+  </div>`).join('');
+
+function getInscriptas(){ try{ return JSON.parse(localStorage.getItem('expotdr')||'[]'); }catch{ return []; } }
+function saveInscriptas(a){ localStorage.setItem('expotdr',JSON.stringify(a)); }
+
+const ADMIN_PASS = 'tdr2026admin';
+let adminUnlocked = false;
+
+function showPage(p){
+  if(p==='admin' && !adminUnlocked){
+    document.getElementById('passwordModal').classList.add('show');
+    setTimeout(()=>document.getElementById('adminPass').focus(), 100);
+    return;
+  }
+  document.querySelectorAll('.page').forEach(el=>el.classList.remove('active'));
+  document.getElementById('page-'+p).classList.add('active');
+  document.querySelectorAll('.nav-tab').forEach((t,i)=>t.classList.toggle('active',(i===0&&(p==='welcome'||p==='form'||p==='completar'))||(i===1&&p==='admin')));
+  if(p==='admin') renderAdmin();
+}
+
+function checkPass(){
+  const val = document.getElementById('adminPass').value;
+  const input = document.getElementById('adminPass');
+  const err = document.getElementById('passError');
+  if(val === ADMIN_PASS){
+    adminUnlocked = true;
+    document.getElementById('passwordModal').classList.remove('show');
+    document.getElementById('adminPass').value = '';
+    err.textContent = '';
+    showPage('admin');
+  } else {
+    input.classList.add('error');
+    err.textContent = 'Contraseña incorrecta';
+    setTimeout(()=>input.classList.remove('error'), 400);
+    input.select();
+  }
+}
+
+function selectFecha(i){
+  selFecha=i;
+  FECHAS.forEach((_,j)=>document.getElementById('fecha-'+j).classList.toggle('sel',i===j));
+  const f = FECHAS[i];
+  PRECIOS = [f.precioEspacio, f.precioMesaRedonda, f.precioTablon];
+  document.getElementById('op-0-price').textContent = '$'+f.precioEspacio.toLocaleString('es-AR');
+  document.getElementById('op-1-price').textContent = '$'+f.precioMesaRedonda.toLocaleString('es-AR');
+  document.getElementById('op-2-price').textContent = '$'+f.precioTablon.toLocaleString('es-AR');
+  updateResumen();
+}
+
+function setGastro(val){
+  esGastro=val;
+  document.getElementById('gastro-si').className='toggle-btn'+(val?' active-f':'');
+  document.getElementById('gastro-no').className='toggle-btn'+(!val?' active-c':'');
+  document.getElementById('gastro-extra').style.display=val?'block':'none';
+}
+
+function toggleLibreta(){
+  const cb=document.getElementById('libreta');
+  cb.checked=!cb.checked;
+  document.getElementById('ci-libreta').classList.toggle('checked',cb.checked);
+  document.getElementById('libreta-upload-box').style.display=cb.checked?'block':'none';
+  updateGastroWarn();
+}
+function toggleCurso(){
+  const cb=document.getElementById('curso');
+  cb.checked=!cb.checked;
+  document.getElementById('ci-curso').classList.toggle('checked',cb.checked);
+  document.getElementById('curso-upload-box').style.display=cb.checked?'block':'none';
+  updateGastroWarn();
+}
+function updateGastroWarn(){
+  const lib=document.getElementById('libreta').checked;
+  const cur=document.getElementById('curso').checked;
+  document.getElementById('gastro-warn').style.display=(!lib||!cur)?'block':'none';
+  document.getElementById('gastro-info').style.display='none';
+}
+
+function selectChica(i){
+  selChica=i;
+  CHICAS.forEach((_,j)=>document.getElementById('chica-'+j).classList.toggle('sel',i===j));
+}
+function cambiarCantidad(i, delta){
+  cantidades[i] = Math.max(0, Math.min(3, cantidades[i] + delta));
+  document.getElementById('cant-'+i).textContent = cantidades[i];
+  // highlight if has quantity
+  for(let j=0;j<3;j++) document.getElementById('op-'+j).classList.toggle('sel', cantidades[j]>0);
+  selOp = cantidades.findIndex(c=>c>0); // for compatibility
+  updateResumen();
+}
+
+function cambiarAdicional(tipo, delta){
+  if(tipo==='espacio'){
+    cantEspacio = Math.max(0, Math.min(3, cantEspacio + delta));
+    document.getElementById('cant-espacio').textContent = cantEspacio;
+  } else {
+    cantSilla = Math.max(0, Math.min(3, cantSilla + delta));
+    document.getElementById('cant-silla').textContent = cantSilla;
+  }
+  updateResumen();
+}
+
+function selectOpcion(i){
+  // kept for compatibility
+  updateResumen();
+}
+function toggleCheck(id){
+  const cb=document.getElementById(id);
+  cb.checked=!cb.checked;
+  document.getElementById('ci-'+id).classList.toggle('checked',cb.checked);
+  updateResumen();
+}
+function setPago(tipo){
+  tipoPago=tipo;
+  document.getElementById('pago-senia').className='toggle-btn'+(tipo==='senia'?' active-f':'');
+  document.getElementById('pago-total').className='toggle-btn'+(tipo==='total'?' active-c':'');
+  document.getElementById('monto-senia-box').style.display=tipo==='senia'?'block':'none';
+  document.getElementById('comprobante-box').style.display='block';
+  document.getElementById('resumen-pago').style.display='block';
+  updateResumen();
+}
+
+function calcTotal(){
+  let t = cantidades[0]*PRECIOS[0] + cantidades[1]*PRECIOS[1] + cantidades[2]*PRECIOS[2];
+  t += cantEspacio * 10000;
+  t += cantSilla * 1000;
+  return t;
+}
+function fmt(n){ return '$'+n.toLocaleString('es-AR'); }
+
+function updateResumen(){
+  const hayOpciones = cantidades.some(c=>c>0);
+  if(!hayOpciones||!tipoPago){ document.getElementById('resumen-pago').style.display='none'; return; }
+  document.getElementById('resumen-pago').style.display='block';
+  const total=calcTotal();
+  const detalle = ['Espacio','Mesa Redonda','Tablón'].map((n,i)=>cantidades[i]>0?cantidades[i]+'x '+n+' '+fmt(PRECIOS[i]*cantidades[i]):'').filter(Boolean).join(' + ');
+  document.getElementById('res-op').textContent = detalle || '—';
+  document.getElementById('res-esp-row').style.display=cantEspacio>0?'flex':'none';
+  if(cantEspacio>0) document.getElementById('res-esp-row').querySelector('span:last-child').textContent=cantEspacio+'x +'+fmt(cantEspacio*10000);
+  document.getElementById('res-sil-row').style.display=cantSilla>0?'flex':'none';
+  if(cantSilla>0) document.getElementById('res-sil-row').querySelector('span:last-child').textContent=cantSilla+'x +'+fmt(cantSilla*1000);
+  document.getElementById('res-total').textContent=fmt(total);
+  const sr=document.getElementById('res-senia-row');
+  if(tipoPago==='senia'){
+    const montoSenia = parseInt(document.getElementById('f-monto-senia').value)||0;
+    const resto = total - montoSenia;
+    sr.style.display='flex';
+    document.getElementById('res-senia-lbl').textContent='Seña: '+fmt(montoSenia)+' · Resta: '+fmt(resto>0?resto:0);
+    document.getElementById('res-senia-val').textContent='';
+  } else { sr.style.display='none'; }
+}
+
+
+const SHEET_URL_V2 = 'https://script.google.com/macros/s/AKfycbx7Q4t5txOnLkAtUWYzPhyuAQXlYM2XT94dDwq3-2pderqq9kcf4tZeT_nY4kiQQ5Ib/exec';
+
+function handleFileComp(input){
+  const f=input.files[0];
+  if(f){ document.getElementById('upload-name').textContent='✓ '+f.name; document.getElementById('uploadArea').classList.add('has-file'); }
+}
+function handleFileLib(input){
+  const f=input.files[0];
+  if(f){ document.getElementById('upload-name-libreta').textContent='✓ '+f.name; document.getElementById('uploadAreaLibreta').classList.add('has-file'); }
+}
+function handleFileCurso(input){
+  const f=input.files[0];
+  if(f){ document.getElementById('upload-name-curso').textContent='✓ '+f.name; document.getElementById('uploadAreaCurso').classList.add('has-file'); }
+}
+
+const IMGBB_KEY = '3416a93b0854cc84b4c53f9ea2a5a966';
+
+async function comprimirImagen(file){
+  return new Promise(resolve=>{
+    const reader = new FileReader();
+    reader.onload = function(e){
+      if(!file.type.startsWith('image/')){ resolve(e.target.result.split(',')[1]); return; }
+      const img = new Image();
+      img.onload = function(){
+        const canvas = document.createElement('canvas');
+        let w = img.width, h = img.height;
+        const maxW = 800;
+        if(w > maxW){ h = Math.round(h * maxW / w); w = maxW; }
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL('image/jpeg', 0.5).split(',')[1]);
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+async function uploadToDrive(file, filename){
+  try {
+    const base64 = await comprimirImagen(file);
+    const fd = new FormData();
+    fd.append('key', IMGBB_KEY);
+    fd.append('image', base64);
+    fd.append('name', filename);
+    const response = await fetch('https://api.imgbb.com/1/upload', {
+      method: 'POST',
+      body: fd
+    });
+    const result = await response.json();
+    console.log('ImgBB result:', result);
+    return result.success ? result.data.url_viewer : '';
+  } catch(err) {
+    console.log('Upload error:', err);
+    return '';
+  }
+}
+
+async function submitForm(){
+  const nombre=document.getElementById('f-nombre').value.trim();
+  const emprendimiento=document.getElementById('f-emprendimiento').value.trim();
+  const rubro=document.getElementById('f-rubro').value.trim();
+  const instagram=document.getElementById('f-instagram').value.trim();
+  const redes=document.getElementById('f-redes').value.trim();
+  const libreta=document.getElementById('libreta').checked;
+  const curso=document.getElementById('curso').checked;
+
+  if(!nombre){ alert('Falta el nombre'); return; }
+  if(!emprendimiento){ alert('Falta el nombre del emprendimiento'); return; }
+  if(!rubro){ alert('Falta el rubro'); return; }
+  const telefono=document.getElementById('f-telefono').value.trim();
+  const mail=document.getElementById('f-mail').value.trim();
+  if(!telefono){ alert('Falta el WhatsApp/teléfono'); return; }
+  if(!mail){ alert('Falta el mail'); return; }
+  if(selFecha<0){ alert('Seleccioná una fecha'); return; }
+  if(selChica<0){ alert('Seleccioná con quién hablaste'); return; }
+  if(cantidades.every(c=>c===0)){ alert('Seleccioná al menos una opción'); return; }
+  if(!tipoPago){ alert('Indicá si enviaste seña o pagaste total'); return; }
+  if(tipoPago==='senia' && !document.getElementById('f-monto-senia').value){ alert('Ingresá el monto de la seña'); return; }
+  if(tipoPago && !document.getElementById('f-comprobante').files.length){ alert('Adjuntá el comprobante de pago'); return; }
+  if(esGastro&&!libreta){ alert('Para rubros gastronómicos es obligatoria la libreta sanitaria vigente'); return; }
+  if(esGastro&&libreta&&!document.getElementById('f-libreta').files.length){ alert('Adjuntá la foto de tu libreta sanitaria'); return; }
+  if(esGastro&&!curso){ alert('Para rubros gastronómicos es obligatorio el curso de manipulación de alimentos'); return; }
+  if(esGastro&&curso&&!document.getElementById('f-curso').files.length){ alert('Adjuntá el certificado del curso'); return; }
+
+  // Mostrar overlay de carga
+  document.getElementById('loadingOverlay').classList.add('show');
+  document.getElementById('loading-text').textContent='Preparando archivos...';
+
+  const total=calcTotal();
+  const f=FECHAS[selFecha];
+  const fechaExpo=f.dia+' de '+f.mes+' 2026';
+
+  const inscripta={
+    id:Date.now(),
+    fechaInscripcion:new Date().toLocaleDateString('es-AR'),
+    nombre, emprendimiento, rubro,
+    telefono:document.getElementById('f-telefono').value.trim(),
+    mail:document.getElementById('f-mail').value.trim(),
+    instagram, redes,
+    fechaExpo,
+    gastro:esGastro,
+    libreta:esGastro?libreta:null,
+    curso:esGastro?curso:null,
+    convoco:CHICAS[selChica],
+    opcion:['Espacio','Mesa Redonda','Tablón'].map((n,i)=>cantidades[i]>0?cantidades[i]+'x '+n:'').filter(Boolean).join(' + '),
+    cantidades:cantidades.join(','),
+    precioBase:PRECIOS.map((p,i)=>p*cantidades[i]).reduce((a,b)=>a+b,0),
+    adicEspacio:cantEspacio,
+    adicSilla:cantSilla,
+    total, tipoPago,
+    senia1: tipoPago==='senia' ? (parseInt(document.getElementById('f-monto-senia').value)||0) : 0,
+    pagado:tipoPago==='total'?total:(parseInt(document.getElementById('f-monto-senia').value)||0),
+    obs:document.getElementById('f-obs').value.trim()
+  };
+
+  // Guardar local
+  // Subir archivos
+  let libretaUrl = '';
+  let cursoUrl = '';
+  let comprobanteUrl = '';
+
+  if(esGastro && libreta && document.getElementById('f-libreta').files[0]){
+    const fLib = document.getElementById('f-libreta').files[0];
+    document.getElementById('btn-submit-text').textContent = 'Subiendo libreta...';
+    libretaUrl = await uploadToDrive(fLib, inscripta.nombre+'_libreta_'+fLib.name);
+  }
+  if(esGastro && curso && document.getElementById('f-curso').files[0]){
+    const fCur = document.getElementById('f-curso').files[0];
+    document.getElementById('btn-submit-text').textContent = 'Subiendo certificado...';
+    cursoUrl = await uploadToDrive(fCur, inscripta.nombre+'_curso_'+fCur.name);
+  }
+
+  // Subir comprobante
+  if(document.getElementById('f-comprobante').files[0]){
+    const fComp = document.getElementById('f-comprobante').files[0];
+    document.getElementById('btn-submit-text').textContent = 'Subiendo comprobante...';
+    comprobanteUrl = await uploadToDrive(fComp, inscripta.nombre+'_comprobante_'+fComp.name);
+  }
+  inscripta.libretaUrl = libretaUrl;
+  inscripta.cursoUrl = cursoUrl;
+  inscripta.comprobanteUrl = comprobanteUrl;
+
+  const arr=getInscriptas(); arr.push(inscripta); saveInscriptas(arr);
+
+  // Mostrar pantalla de éxito inmediatamente
+  document.getElementById('success-msg').textContent=
+    emprendimiento+' · '+rubro+' · Fecha: '+fechaExpo+
+    ' · Convocada por '+CHICAS[selChica]+
+    ' · '+inscripta.opcion+' · '+fmt(inscripta.pagado)+
+    (tipoPago==='senia'?' (seña)':' (total)');
+
+  // WhatsApp box
+  const chicaname = CHICAS[selChica];
+  const wanum = CHICAS_WA[chicaname];
+  const waNumDisplay = wanum.replace('54911','11 ').replace(/(\d{4})(\d{4})$/,'$1-$2');
+
+  // Build full message with all inscription data
+  const opcionTexto = ['Espacio','Mesa Redonda','Tablón'].map((n,i)=>cantidades[i]>0?cantidades[i]+'x '+n:'').filter(Boolean).join(' + ');
+  const adicTexto = [];
+  if(cantEspacio>0) adicTexto.push(cantEspacio+' espacio/s extra');
+  if(cantSilla>0) adicTexto.push(cantSilla+' silla/s');
+
+  const montoSeniaVal = parseInt(document.getElementById('f-monto-senia')?.value)||0;
+  const pagoTexto = tipoPago==='total'
+    ? '💵 Pagué el total: '+fmt(calcTotal())
+    : '💵 Mandé una seña de: '+fmt(montoSeniaVal);
+
+  let docsTexto = '✅ Subí el comprobante de pago';
+  if(esGastro){
+    docsTexto += '\n✅ Subí la libreta sanitaria';
+    docsTexto += '\n✅ Subí el certificado del curso de manipulación de alimentos';
+  }
+
+  const resto = total - montoSeniaVal;
+  const docsSimple = esGastro ? 'Subi el comprobante, la libreta sanitaria y el certificado del curso.' : 'Subi el comprobante de pago.';
+  const waMsg = encodeURIComponent(
+    'Hola '+chicaname+'! Me inscribi a la Expo TDR' +
+    '\n\nNombre: '+nombre+
+    '\nEmprendimiento: '+emprendimiento+
+    '\nRubro: '+rubro+
+    '\nFecha: '+fechaExpo+
+    '\nOpcion: '+opcionTexto+
+    (adicTexto.length>0?'\nAdicionales: '+adicTexto.join(' + '):'')+ 
+    '\nTotal a pagar: '+fmt(total)+
+    (tipoPago==='senia'?'\nSeña enviada: '+fmt(montoSeniaVal)+'\nResta pagar: '+fmt(resto>0?resto:0):'\nPague el total: '+fmt(total))+
+    '\n\n'+docsSimple+
+    '\n\nQuedo a la espera de la confirmacion!'
+  );
+
+  document.getElementById('wa-chica-nombre').textContent = chicaname;
+  document.getElementById('wa-link').href = 'https://wa.me/'+wanum+'?text='+waMsg;
+
+  document.getElementById('loadingOverlay').classList.remove('show');
+  document.getElementById('formContent').style.display='none';
+  document.getElementById('successContent').style.display='block';
+
+  // Enviar a Google Sheets
+  const SHEET_URL = 'https://script.google.com/macros/s/AKfycbx7Q4t5txOnLkAtUWYzPhyuAQXlYM2XT94dDwq3-2pderqq9kcf4tZeT_nY4kiQQ5Ib/exec';
+  // Enviar via URL params a Google Sheets
+  var params = [
+    'nombre=' + encodeURIComponent(inscripta.nombre),
+    'emprendimiento=' + encodeURIComponent(inscripta.emprendimiento),
+    'rubro=' + encodeURIComponent(inscripta.rubro),
+    'telefono=' + encodeURIComponent(inscripta.telefono||''),
+    'mail=' + encodeURIComponent(inscripta.mail||''),
+    'instagram=' + encodeURIComponent(inscripta.instagram||''),
+    'redes=' + encodeURIComponent(inscripta.redes||''),
+    'fechaExpo=' + encodeURIComponent(inscripta.fechaExpo),
+    'fechaInscripcion=' + encodeURIComponent(inscripta.fechaInscripcion),
+    'convoco=' + encodeURIComponent(inscripta.convoco),
+    'opcion=' + encodeURIComponent(inscripta.opcion),
+    'precioBase=' + encodeURIComponent(inscripta.precioBase),
+    'adicEspacio=' + encodeURIComponent(inscripta.adicEspacio),
+    'adicSilla=' + encodeURIComponent(inscripta.adicSilla),
+    'cantidades=' + encodeURIComponent(inscripta.cantidades||''),
+    'total=' + encodeURIComponent(inscripta.total),
+    'tipoPago=' + encodeURIComponent(inscripta.tipoPago),
+    'senia1=' + encodeURIComponent(inscripta.senia1||0),
+    'totalPagado=' + encodeURIComponent(inscripta.tipoPago==='total' ? inscripta.total : ''),
+    'gastro=' + encodeURIComponent(inscripta.gastro),
+    'libreta=' + encodeURIComponent(inscripta.libreta),
+    'curso=' + encodeURIComponent(inscripta.curso),
+    'obs=' + encodeURIComponent(inscripta.obs||''),
+    'libretaUrl=' + encodeURIComponent(inscripta.libretaUrl||''),
+    'cursoUrl=' + encodeURIComponent(inscripta.cursoUrl||''),
+    'comprobanteUrl=' + encodeURIComponent(inscripta.comprobanteUrl||'')
+  ].join('&');
+  fetch(SHEET_URL + '?' + params, {mode:'no-cors'}).catch(e=>console.log(e));
+}
+
+function resetForm(){
+  ['f-nombre','f-emprendimiento','f-rubro','f-telefono','f-mail','f-instagram','f-redes','f-obs'].forEach(id=>document.getElementById(id).value='');
+  ['libreta','curso'].forEach(id=>{ document.getElementById(id).checked=false; document.getElementById('ci-'+id)?.classList.remove('checked'); });
+  cantEspacio=0; cantSilla=0;
+  document.getElementById('cant-espacio').textContent='0';
+  document.getElementById('cant-silla').textContent='0';
+  ['libreta-upload-box','curso-upload-box'].forEach(id=>document.getElementById(id).style.display='none');
+  document.getElementById('gastro-warn').style.display='none';
+  document.getElementById('gastro-info').style.display='block';
+  esGastro=false; selOp=-1; selChica=-1; tipoPago=null; selFecha=-1; cantidades=[0,0,0];
+  for(let j=0;j<3;j++){document.getElementById('cant-'+j).textContent='0'; document.getElementById('op-'+j).classList.remove('sel');}
+  setGastro(false);
+  for(let j=0;j<3;j++){ document.getElementById('op-'+j).classList.remove('sel'); document.getElementById('chica-'+j).classList.remove('sel'); }
+  FECHAS.forEach((_,j)=>document.getElementById('fecha-'+j).classList.remove('sel'));
+  ['pago-senia','pago-total'].forEach(id=>document.getElementById(id).className='toggle-btn');
+  document.getElementById('f-monto-senia').value='';
+  document.getElementById('monto-senia-box').style.display='none';
+  document.getElementById('resumen-pago').style.display='none';
+  const cb = document.getElementById('comprobante-box'); if(cb) cb.style.display='none';
+
+  document.getElementById('formContent').style.display='block';
+  document.getElementById('successContent').style.display='none';
+}
+
+// ADMIN
+function setFilter(f,btn){
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderTable(f);
+}
+
+function renderAdmin(){
+  const all=getInscriptas();
+  const totalRec=all.reduce((s,r)=>s+r.pagado,0);
+  const totalEsp=all.reduce((s,r)=>s+r.total,0);
+  document.getElementById('stats-grid').innerHTML=`
+    <div class="stat-card"><div class="stat-label">Inscriptas</div><div class="stat-value" style="color:var(--celeste)">${all.length}</div></div>
+    <div class="stat-card"><div class="stat-label">Pagaron total</div><div class="stat-value" style="color:var(--verde)">${all.filter(r=>r.tipoPago==='total').length}</div></div>
+    <div class="stat-card"><div class="stat-label">Solo seña</div><div class="stat-value" style="color:var(--amarillo)">${all.filter(r=>r.tipoPago==='senia').length}</div></div>
+    <div class="stat-card"><div class="stat-label">Recaudado</div><div class="stat-value" style="font-size:18px;color:var(--fucsia)">${fmt(totalRec)}</div><div class="stat-sub">de ${fmt(totalEsp)} esperado</div></div>
+  `;
+  const rubrosTiene=[...new Set(all.map(r=>r.rubro.toLowerCase()))];
+  document.getElementById('rubros-grid').innerHTML=RUBROS_REF.map(r=>{
+    const tiene=rubrosTiene.some(rt=>rt.includes(r.toLowerCase().split('/')[0].trim()));
+    return `<span class="rubro-tag ${tiene?'tiene':'falta'}">${tiene?'✓':'✗'} ${r}</span>`;
+  }).join('');
+  renderTable('todos');
+}
+
+function renderTable(f){
+  const all=getInscriptas();
+  let datos=all;
+  if(f==='total') datos=all.filter(r=>r.tipoPago==='total');
+  else if(f==='senia') datos=all.filter(r=>r.tipoPago==='senia');
+  else if(f==='gastro') datos=all.filter(r=>r.gastro);
+  else if(f==='nina') datos=all.filter(r=>r.convoco==='Nina');
+  else if(f==='romi') datos=all.filter(r=>r.convoco==='Romi');
+  else if(f==='pame') datos=all.filter(r=>r.convoco==='Pame');
+
+  const tbody=document.getElementById('admin-tbody');
+  if(!datos.length){
+    tbody.innerHTML=`<tr><td colspan="14"><div class="empty-state"><div class="big">📋</div>No hay inscriptas todavía</div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML=datos.map((r,i)=>{
+    const pagBadge=r.tipoPago==='total'?`<span class="badge b-verde">✅ Total</span>`:`<span class="badge b-amarillo">Seña</span>`;
+    const gastroBadge=r.gastro?(r.libreta&&r.curso?`<span class="badge b-verde">✓ Docs OK</span>`:`<span class="badge b-fucsia">⚠ Docs</span>`):'-';
+    const adics=[r.adicEspacio?'+Esp':'',r.adicSilla?'+Silla':''].filter(Boolean).join(', ')||'—';
+    const chBadge={'Nina':'b-celeste','Romi':'b-fucsia','Pame':'b-amarillo'}[r.convoco]||'b-gris';
+    const ig=r.instagram?`<a href="https://instagram.com/${r.instagram.replace('@','')}" target="_blank" style="color:var(--celeste);text-decoration:none">${r.instagram}</a>`:'—';
+    return `<tr class="${r.tipoPago==='total'?'row-total':''}">
+      <td style="color:var(--text2)">${i+1}</td>
+      <td style="font-weight:600">${r.nombre}</td>
+      <td style="font-weight:600;color:var(--fucsia)">${r.emprendimiento||'—'}</td>
+      <td>${r.rubro}</td>
+      <td>${ig}</td>
+      <td style="font-size:12px;color:var(--text2)">${r.redes||'—'}</td>
+      <td style="font-size:12px;font-weight:600">${r.fechaExpo||'—'}</td>
+      <td><span class="badge ${chBadge}">${r.convoco}</span></td>
+      <td style="font-size:12px">${r.opcion}</td>
+      <td style="font-size:12px;color:var(--text2)">${adics}</td>
+      <td style="font-weight:700;color:#7a6600">${fmt(r.total)}</td>
+      <td>${pagBadge}<br><span style="font-size:11px;color:var(--text2)">${fmt(r.pagado)}</span></td>
+      <td>${gastroBadge}</td>
+      <td style="font-size:11px;color:var(--text2)">${r.fechaInscripcion}</td>
+    </tr>`;
+  }).join('');
+}
+
+function getRowsForExport(){
+  return getInscriptas().map(r=>({
+    'Fecha inscripción': r.fechaInscripcion,
+    'Nombre': r.nombre,
+    'Emprendimiento': r.emprendimiento||'',
+    'Rubro': r.rubro,
+    'Instagram': r.instagram||'',
+    'Otras redes': r.redes||'',
+    'Fecha expo': r.fechaExpo||'',
+    'Convocó': r.convoco,
+    'Opción': r.opcion,
+    'Precio base ($)': r.precioBase,
+    'Adic. Espacio': r.adicEspacio?'Sí':'No',
+    'Adic. Silla': r.adicSilla?'Sí':'No',
+    'Total ($)': r.total,
+    'Tipo pago': r.tipoPago==='total'?'Total':'Seña',
+    'Pagado ($)': r.pagado,
+    'Gastro': r.gastro?'Sí':'No',
+    'Libreta sanitaria': r.gastro?(r.libreta?'Sí':'No'):'N/A',
+    'Curso manipulación': r.gastro?(r.curso?'Sí':'No'):'N/A',
+    'Observaciones': r.obs||''
+  }));
+}
+
+function exportCSV(){
+  const rows=getRowsForExport();
+  if(!rows.length){ alert('No hay inscriptas para exportar'); return; }
+  const headers=Object.keys(rows[0]);
+  const csv=[headers.join(','),...rows.map(r=>headers.map(h=>`"${r[h]}"`).join(','))].join('\n');
+  const a=document.createElement('a');
+  a.href='data:text/csv;charset=utf-8,\uFEFF'+encodeURIComponent(csv);
+  a.download='expo_tdr_inscriptas.csv'; a.click();
+}
+
+function exportXLSX(){
+  const rows=getRowsForExport();
+  if(!rows.length){ alert('No hay inscriptas para exportar'); return; }
+  const wb=XLSX.utils.book_new();
+  const ws=XLSX.utils.json_to_sheet(rows);
+
+  // Column widths
+  ws['!cols']=[
+    {wch:16},{wch:22},{wch:24},{wch:20},{wch:20},{wch:20},{wch:18},
+    {wch:10},{wch:16},{wch:12},{wch:14},{wch:12},{wch:12},{wch:12},
+    {wch:12},{wch:8},{wch:16},{wch:18},{wch:30}
+  ];
+
+  XLSX.utils.book_append_sheet(wb,'Inscriptas',ws);
+  XLSX.writeFile(wb,'expo_tdr_inscriptas.xlsx');
+}
+
+
+
+
+</script>
+
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loading-spinner"></div>
+  <div class="loading-text" id="loading-text">Subiendo archivos...</div>
+  <div class="loading-sub" id="loading-sub">⚠️ No cierres esta pantalla hasta que termine</div>
+</div>
+
+
+
+<div class="help-overlay" id="helpModal" onclick="if(event.target===this) this.classList.remove('show')">
+  <div class="help-box">
+    <div class="help-header">
+      <div class="help-title">¿Cómo inscribirme?</div>
+      <button class="help-close" onclick="document.getElementById('helpModal').classList.remove('show')">✕</button>
+    </div>
+
+    <div class="help-step">
+      <div class="help-num">1</div>
+      <div class="help-text"><strong>Antes de empezar, tené listo:</strong><br>
+        📎 Foto o captura del comprobante de transferencia al alias <strong>tdr2026</strong><br>
+        🍽️ Si sos gastronómica: foto de tu libreta sanitaria vigente y del certificado del curso<br>
+        <span style="color:var(--text2);font-size:11px">Ej: captura de Mercado Pago o Lemon donde se vea el monto y el destinatario</span>
+      </div>
+    </div>
+
+    <div class="help-step">
+      <div class="help-num">2</div>
+      <div class="help-text"><strong>Elegí qué querés hacer:</strong><br>
+        👉 <strong>"Quiero anotarme"</strong> → primera vez que te inscribís para esta fecha<br>
+        👉 <strong>"Completar el pago de mi seña"</strong> → ya te anotaste y querés pagar el resto<br>
+        <span style="color:var(--text2);font-size:11px">Ej: hablaste con Romi y te dijo que te anotes → elegí "Quiero anotarme"</span>
+      </div>
+    </div>
+
+    <div style="background:#fff0f7;border-radius:10px;padding:12px;margin-top:8px;font-size:12px;color:#aa004a;text-align:center">
+      ¿Dudas? Escribile a la chica que te convocó 💬
+    </div>
+  </div>
+</div>
+</body>
+</html>
