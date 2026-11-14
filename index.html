@@ -252,6 +252,22 @@ body.plan-fullscreen .queue-card{max-height:calc(100vh - 170px);overflow:auto;to
 .sync-status{font-size:12px;font-weight:800}
 .sync-status.ok{color:#17803d}.sync-status.warn{color:#9a6700}.sync-status.bad{color:#b42318}
 
+
+.island-number{
+  position:absolute;left:-12px;top:-12px;z-index:30;
+  min-width:34px;height:34px;padding:0 8px;border-radius:999px;
+  background:#111;color:#fff;border:2px solid #fff;
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:900;box-shadow:0 2px 8px #0003
+}
+.island-slot-number{
+  position:absolute;left:-7px;top:-7px;z-index:9;
+  min-width:22px;height:22px;padding:0 5px;border-radius:999px;
+  background:#22e8f8;color:#071417;border:2px solid #fff;
+  display:flex;align-items:center;justify-content:center;
+  font-size:9px;font-weight:900;box-shadow:0 1px 4px #0002
+}
+
 </style>
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
@@ -767,8 +783,31 @@ function assignToIslandSlot(island,slotIndex,person){
  return true;
 }
 function clearIslandPerson(island,exhibitorId){island.slots=island.slots.map(s=>s.exhibitorId===exhibitorId?{id:s.id,exhibitorId:null,primary:false,type:"space"}:s);queueIndexes[editionSelect.value]=0;saveAll();renderMesas()}
+
+function nextIslandNumber(){
+  const nums=currentLayout()
+    .filter(x=>x.kind==="island")
+    .map(x=>Number(x.number))
+    .filter(Number.isFinite);
+  return nums.length?Math.max(...nums)+1:1;
+}
+
 function renderIsland(island){
- const d=islandDims(island), wrap=document.createElement("div");wrap.className="island"+(island.locked?" locked":"");wrap.dataset.islandId=island.id;wrap.style.left=island.x+"px";wrap.style.top=island.y+"px";wrap.style.width=d.w+"px";wrap.style.height=d.h+"px";
+ if(!island.number)island.number=String(nextIslandNumber());
+ const d=islandDims(island), wrap=document.createElement("div");wrap.className="island"+(island.locked?" locked":"");
+ const islandNum=document.createElement("div");
+ islandNum.className="island-number";
+ islandNum.textContent="I"+(island.number||"?");
+ islandNum.title="Doble clic para cambiar número de isla";
+ islandNum.ondblclick=e=>{
+   e.stopPropagation();
+   const n=prompt("Número de isla:",island.number||"");
+   if(n!==null){
+     island.number=String(n).trim()||island.number||"?";
+     saveAll();renderMesas();
+   }
+ };
+wrap.dataset.islandId=island.id;wrap.style.left=island.x+"px";wrap.style.top=island.y+"px";wrap.style.width=d.w+"px";wrap.style.height=d.h+"px";wrap.appendChild(islandNum);
  const body=document.createElement("div");body.className="island-body";body.style.width=d.bodyW+"px";body.style.height=d.bodyH+"px";body.style.left=(d.w-d.bodyW)/2+"px";body.style.top=(d.h-d.bodyH)/2+"px";body.textContent="ISLA";wrap.appendChild(body);
  const controls=document.createElement("div");controls.className="island-controls";controls.style.left=((d.w-240)/2)+"px";controls.style.top=((d.h-d.bodyH)/2+8)+"px";controls.innerHTML=`<button data-act="add">+ lugar</button><button data-act="remove">− lugar</button><button data-act="rotate">↻ girar</button><button data-act="lock">${island.locked?"🔒":"🔓"}</button><button class="danger" data-act="delete">Eliminar</button>`;wrap.appendChild(controls);
  controls.querySelector('[data-act="add"]').onclick=e=>{e.stopPropagation();island.slots.push({id:"s"+Date.now(),exhibitorId:null,primary:false,type:"space"});saveAll();renderMesas()};
@@ -782,13 +821,13 @@ function renderIsland(island){
    el.dataset.type=slotType;
    if(slot.exhibitorId){
      if(slot.primary!==false){
-       el.innerHTML=`<button class="slot-remove">×</button><div class="island-type-badge"><span class="island-type-icon ${slotType}"></span>${labelType(slotType)}</div><div style="padding-top:14px">${p?.name||"—"}<br><span style="font-weight:600">${p?.venture||""}</span></div>`;
+       el.innerHTML=`<span class="island-slot-number">${i+1}</span><button class="slot-remove">×</button><div class="island-type-badge"><span class="island-type-icon ${slotType}"></span>${labelType(slotType)}</div><div style="padding-top:14px">${p?.name||"—"}<br><span style="font-weight:600">${p?.venture||""}</span></div>`;
        el.querySelector('.slot-remove').onclick=ev=>{ev.stopPropagation();clearIslandPerson(island,slot.exhibitorId)};
        renderChairs(el,Number(p?.participation?.extraChair||0),slotType);
      }else{
-       el.innerHTML=`<div class="island-type-badge"><span class="island-type-icon ${slotType}"></span>${labelType(slotType)}</div><div style="padding-top:14px">+ espacio adicional</div>`;
+       el.innerHTML=`<span class="island-slot-number">${i+1}</span><div class="island-type-badge"><span class="island-type-icon ${slotType}"></span>${labelType(slotType)}</div><div style="padding-top:14px">+ espacio adicional</div>`;
      }
-   } else el.innerHTML='<div>Lugar libre<br><span style="font-weight:600">soltá acá</span></div>';
+   } else el.innerHTML=`<span class="island-slot-number">${i+1}</span><div>Lugar libre<br><span style="font-weight:600">soltá acá</span></div>`;
    el.ondragover=ev=>{ev.preventDefault();ev.stopPropagation();el.classList.add("drag-over")};el.ondragleave=()=>el.classList.remove("drag-over");el.ondrop=ev=>{ev.preventDefault();ev.stopPropagation();el.classList.remove("drag-over");if(!dragGhost||slot.exhibitorId)return;if(assignToIslandSlot(island,i,dragGhost.person)){dragGhost=null;queueIndexes[editionSelect.value]=0;saveAll();renderMesas()}};wrap.appendChild(el);
  });
  if(!island.locked){body.onpointerdown=ev=>{if(ev.target.closest('button'))return;const r=floorCanvas.getBoundingClientRect();const startX=ev.clientX,startY=ev.clientY,ox=island.x,oy=island.y;body.setPointerCapture(ev.pointerId);body.onpointermove=mv=>{island.x=Math.max(0,Math.min(1050-d.w,ox+mv.clientX-startX));island.y=Math.max(40,Math.min(680-d.h,oy+mv.clientY-startY));wrap.style.left=island.x+"px";wrap.style.top=island.y+"px"};body.onpointerup=()=>{body.onpointermove=null;saveAll()}}}
@@ -1108,11 +1147,11 @@ function locationRows(){
        const p=participantById(s.exhibitorId);
        rows.push({
          p,
-         type:`Isla · ${labelType(typeFromOption(p?.participation?.option||""))}`,
-         number:`I${idx+1}`,
+         type:`${labelType(typeFromOption(p?.participation?.option||""))}`,
+         number:`Isla ${t.number||"?"} - Puesto ${idx+1}`,
          extraSpace:Number(p?.participation?.extraSpace||0),
          extraChair:Number(p?.participation?.extraChair||0),
-         sortNumber:10000+idx
+         sortNumber:10000+(Number(t.number)||0)*100+idx
        });
      });
    }else if(t.exhibitorId){
@@ -1155,7 +1194,7 @@ addManualEntrepreneur.onclick=()=>{
  const participation={manualId:id,editionId:eid,exhibitorId:id,registeredAt:new Date().toLocaleDateString("es-AR"),option,amountDue:0,paid:0,balance:0,invitedBy:"Carga manual",notes:"Agregado manualmente desde el plano",paidTotal:"No",extraSpace:Number(manualExtraSpace.value||0),extraChair:Number(manualExtraChair.value||0),paymentType:"Manual"};
  EXHIBITORS.push(exhibitor);PARTICIPATIONS.push(participation);manualStore.push({exhibitor,participation});saveManualStore();manualName.value="";manualVenture.value="";manualExtraSpace.value=0;manualExtraChair.value=0;queueIndexes[eid]=Math.max(0,availableQueue().length-1);renderMesas();
 };
-function addIsland(orientation){const l=currentLayout(),n=l.filter(x=>x.kind==="island").length;l.push({id:"island-"+Date.now(),kind:"island",orientation,locked:false,x:360+(n%2)*40,y:180+(n%3)*30,slots:Array.from({length:6},(_,i)=>({id:"slot-"+Date.now()+"-"+i,exhibitorId:null,primary:false,type:"space"}))});saveAll();renderMesas()}
+function addIsland(orientation){const l=currentLayout(),n=l.filter(x=>x.kind==="island").length;l.push({id:"island-"+Date.now(),kind:"island",number:String(nextIslandNumber()),orientation,locked:false,x:360+(n%2)*40,y:180+(n%3)*30,slots:Array.from({length:6},(_,i)=>({id:"slot-"+Date.now()+"-"+i,exhibitorId:null,primary:false,type:"space"}))});saveAll();renderMesas()}
 addIslandHorizontal.onclick=()=>addIsland("horizontal");addIslandVertical.onclick=()=>addIsland("vertical");
 
 function renderMesas(){renderQueue();renderTokens();renderLocations();}
