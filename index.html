@@ -452,6 +452,9 @@ body.plan-fullscreen .queue-card{max-height:calc(100vh - 170px);overflow:auto;to
       <button class="action ghost" id="closeEditIslandSlot">Cerrar</button>
     </div>
     <div class="edit-grid" style="margin-top:14px">
+      <label>Número del stand
+        <input id="editIslandStandNumber" type="text" placeholder="Ej: 7">
+      </label>
       <label>Tipo
         <select id="editIslandType">
           <option value="round">Mesa redonda</option>
@@ -823,7 +826,7 @@ function assignToIslandSlot(island,slotIndex,person){
  indexes.forEach((idx,j)=>slots[idx]={...slots[idx],exhibitorId:person.id,primary:j===0,type:typeFromOption(person.participation?.option||"")});
  return true;
 }
-function clearIslandPerson(island,exhibitorId){island.slots=island.slots.map(s=>s.exhibitorId===exhibitorId?{id:s.id,exhibitorId:null,primary:false,type:"space"}:s);queueIndexes[editionSelect.value]=0;saveAll();renderMesas()}
+function clearIslandPerson(island,exhibitorId){island.slots=island.slots.map(s=>s.exhibitorId===exhibitorId?{id:s.id,exhibitorId:null,primary:false,type:"space",standNumber:s.standNumber}:s);queueIndexes[editionSelect.value]=0;saveAll();renderMesas()}
 
 function nextIslandNumber(){
   const nums=currentLayout()
@@ -845,7 +848,8 @@ function openIslandSlotEditor(islandId,slotIndex){
   editingIslandId=islandId;
   editingIslandSlotIndex=slotIndex;
 
-  editIslandSlotLabel.textContent=`Isla ${island.number||"?"} - Puesto ${slotIndex+1}`;
+  editIslandSlotLabel.textContent=`Isla ${island.number||"?"} - Puesto ${slot.standNumber||slotIndex+1}`;
+  editIslandStandNumber.value=slot.standNumber||String(slotIndex+1);
   editIslandType.value=slot.type||typeFromOption(p?.participation?.option||"");
   editIslandChairs.value=slot.chairsOverride!=null?Number(slot.chairsOverride):Number(p?.participation?.extraChair||0);
   editIslandExtra.value=slot.extraOverride!=null?Number(slot.extraOverride):Number(p?.participation?.extraSpace||0);
@@ -865,6 +869,7 @@ saveIslandSlotEdit.onclick=()=>{
   const island=currentLayout().find(x=>x.kind==="island" && x.id===editingIslandId);
   const slot=island?.slots?.[editingIslandSlotIndex];
   if(!slot)return;
+  slot.standNumber=String(editIslandStandNumber.value||"").trim()||String(editingIslandSlotIndex+1);
   slot.type=editIslandType.value;
   slot.chairsOverride=Math.max(0,Number(editIslandChairs.value||0));
   slot.extraOverride=Math.max(0,Number(editIslandExtra.value||0));
@@ -899,7 +904,7 @@ changeIslandEntrepreneur.onclick=()=>{
   modal.className="assign-modal open";
   modal.innerHTML=`<div class="assign-card">
     <div class="row">
-      <div><h3 style="margin:0">Elegir emprendedor</h3><div class="muted small">Para Isla ${island.number||"?"} - Puesto ${targetIndex+1}</div></div>
+      <div><h3 style="margin:0">Elegir emprendedor</h3><div class="muted small">Para Isla ${island.number||"?"} - Puesto ${island.slots[targetIndex]?.standNumber||targetIndex+1}</div></div>
       <button class="action ghost" data-close>Cerrar</button>
     </div>
     <div data-box style="margin-top:12px"></div>
@@ -957,7 +962,7 @@ function renderIsland(island){
 wrap.dataset.islandId=island.id;wrap.style.left=island.x+"px";wrap.style.top=island.y+"px";wrap.style.width=d.w+"px";wrap.style.height=d.h+"px";wrap.appendChild(islandNum);
  const body=document.createElement("div");body.className="island-body";body.style.width=d.bodyW+"px";body.style.height=d.bodyH+"px";body.style.left=(d.w-d.bodyW)/2+"px";body.style.top=(d.h-d.bodyH)/2+"px";body.textContent="ISLA";wrap.appendChild(body);
  const controls=document.createElement("div");controls.className="island-controls";controls.style.left=((d.w-240)/2)+"px";controls.style.top=((d.h-d.bodyH)/2+8)+"px";controls.innerHTML=`<button data-act="add">+ lugar</button><button data-act="remove">− lugar</button><button data-act="rotate">↻ girar</button><button data-act="lock">${island.locked?"🔒":"🔓"}</button><button class="danger" data-act="delete">Eliminar</button>`;wrap.appendChild(controls);
- controls.querySelector('[data-act="add"]').onclick=e=>{e.stopPropagation();island.slots.push({id:"s"+Date.now(),exhibitorId:null,primary:false,type:"space"});saveAll();renderMesas()};
+ controls.querySelector('[data-act="add"]').onclick=e=>{e.stopPropagation();island.slots.push({id:"s"+Date.now(),exhibitorId:null,primary:false,type:"space",standNumber:String(island.slots.length+1)});saveAll();renderMesas()};
  controls.querySelector('[data-act="remove"]').onclick=e=>{e.stopPropagation();if(island.slots.length<=4){alert("La isla debe tener como mínimo 4 lugares.");return}const last=island.slots[island.slots.length-1];if(last.exhibitorId){alert("El último lugar está ocupado. Sacá primero al emprendedor.");return}island.slots.pop();saveAll();renderMesas()};
  controls.querySelector('[data-act="rotate"]').onclick=e=>{e.stopPropagation();island.orientation=island.orientation==="vertical"?"horizontal":"vertical";saveAll();renderMesas()};
  controls.querySelector('[data-act="lock"]').onclick=e=>{e.stopPropagation();island.locked=!island.locked;saveAll();renderMesas()};
@@ -968,15 +973,15 @@ wrap.dataset.islandId=island.id;wrap.style.left=island.x+"px";wrap.style.top=isl
    el.dataset.type=slotType;
    if(slot.exhibitorId){
      if(slot.primary!==false){
-       el.innerHTML=`<span class="island-slot-number">${i+1}</span><button class="slot-remove">×</button><button class="island-slot-edit" type="button" title="Editar puesto">✎</button><div class="island-type-badge"><span class="island-type-icon ${slotType}"></span>${labelType(slotType)}</div><div style="padding-top:14px">${p?.name||"—"}<br><span style="font-weight:600">${p?.venture||""}</span></div>`;
+       el.innerHTML=`<span class="island-slot-number">${slot.standNumber||i+1}</span><button class="slot-remove">×</button><button class="island-slot-edit" type="button" title="Editar puesto">✎</button><div class="island-type-badge"><span class="island-type-icon ${slotType}"></span>${labelType(slotType)}</div><div style="padding-top:14px">${p?.name||"—"}<br><span style="font-weight:600">${p?.venture||""}</span></div>`;
        el.querySelector('.slot-remove').onclick=ev=>{ev.stopPropagation();clearIslandPerson(island,slot.exhibitorId)};
        el.querySelector('.island-slot-edit').onclick=ev=>{ev.stopPropagation();openIslandSlotEditor(island.id,i)};
        const islandChairs=slot.chairsOverride!=null?Number(slot.chairsOverride):Number(p?.participation?.extraChair||0);
        renderChairs(el,islandChairs,slotType);
      }else{
-       el.innerHTML=`<span class="island-slot-number">${i+1}</span><div class="island-type-badge"><span class="island-type-icon ${slotType}"></span>${labelType(slotType)}</div><div style="padding-top:14px">+ espacio adicional</div>`;
+       el.innerHTML=`<span class="island-slot-number">${slot.standNumber||i+1}</span><div class="island-type-badge"><span class="island-type-icon ${slotType}"></span>${labelType(slotType)}</div><div style="padding-top:14px">+ espacio adicional</div>`;
      }
-   } else el.innerHTML=`<span class="island-slot-number">${i+1}</span><div>Lugar libre<br><span style="font-weight:600">soltá acá</span></div>`;
+   } else el.innerHTML=`<span class="island-slot-number">${slot.standNumber||i+1}</span><div>Lugar libre<br><span style="font-weight:600">soltá acá</span></div>`;
    el.ondragover=ev=>{ev.preventDefault();ev.stopPropagation();el.classList.add("drag-over")};el.ondragleave=()=>el.classList.remove("drag-over");el.ondrop=ev=>{ev.preventDefault();ev.stopPropagation();el.classList.remove("drag-over");if(!dragGhost||slot.exhibitorId)return;if(assignToIslandSlot(island,i,dragGhost.person)){dragGhost=null;queueIndexes[editionSelect.value]=0;saveAll();renderMesas()}};wrap.appendChild(el);
  });
  if(!island.locked){body.onpointerdown=ev=>{if(ev.target.closest('button'))return;const r=floorCanvas.getBoundingClientRect();const startX=ev.clientX,startY=ev.clientY,ox=island.x,oy=island.y;body.setPointerCapture(ev.pointerId);body.onpointermove=mv=>{island.x=Math.max(0,Math.min(1050-d.w,ox+mv.clientX-startX));island.y=Math.max(40,Math.min(680-d.h,oy+mv.clientY-startY));wrap.style.left=island.x+"px";wrap.style.top=island.y+"px"};body.onpointerup=()=>{body.onpointermove=null;saveAll()}}}
@@ -1297,7 +1302,7 @@ function locationRows(){
        rows.push({
          p,
          type:labelType(typeFromOption(p?.participation?.option||"")),
-         number:`Isla ${t.number||"?"} - Puesto ${idx+1}`,
+         number:`Isla ${t.number||"?"} - Puesto ${s.standNumber||idx+1}`,
          extraSpace:s.extraOverride!=null?Number(s.extraOverride):Number(p?.participation?.extraSpace||0),
          extraChair:s.chairsOverride!=null?Number(s.chairsOverride):Number(p?.participation?.extraChair||0),
          sortNumber:10000+(Number(t.number)||0)*100+idx
