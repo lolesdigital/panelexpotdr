@@ -255,7 +255,7 @@ body.plan-fullscreen .queue-card{max-height:calc(100vh - 170px);overflow:auto;to
 
 .island-number{
   position:absolute;left:-12px;top:-12px;z-index:30;
-  min-width:34px;height:34px;padding:0 8px;border-radius:999px;
+  min-width:64px;height:34px;padding:0 10px;border-radius:999px;
   background:#111;color:#fff;border:2px solid #fff;
   display:flex;align-items:center;justify-content:center;
   font-size:12px;font-weight:900;box-shadow:0 2px 8px #0003
@@ -266,6 +266,14 @@ body.plan-fullscreen .queue-card{max-height:calc(100vh - 170px);overflow:auto;to
   background:#22e8f8;color:#071417;border:2px solid #fff;
   display:flex;align-items:center;justify-content:center;
   font-size:9px;font-weight:900;box-shadow:0 1px 4px #0002
+}
+
+
+.island-slot-edit{
+  position:absolute;right:-7px;top:-7px;z-index:10;
+  width:24px;height:24px;border-radius:999px;border:0;
+  background:#22e8f8;color:#071417;font-weight:900;cursor:pointer;
+  box-shadow:0 1px 4px #0002
 }
 
 </style>
@@ -428,6 +436,39 @@ body.plan-fullscreen .queue-card{max-height:calc(100vh - 170px);overflow:auto;to
         <button class="action soft" id="savePostEdit">Guardar cambios</button>
         <button class="action alt" id="editAssignEntrepreneur">Asignar / cambiar emprendedor</button>
         <button class="action ghost" id="deletePost">Eliminar puesto</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div id="editIslandSlotModal" class="edit-modal">
+  <div class="edit-card">
+    <div class="row">
+      <div>
+        <h3 style="margin:0">Editar puesto de isla</h3>
+        <div class="muted small" id="editIslandSlotLabel">Isla</div>
+      </div>
+      <button class="action ghost" id="closeEditIslandSlot">Cerrar</button>
+    </div>
+    <div class="edit-grid" style="margin-top:14px">
+      <label>Tipo
+        <select id="editIslandType">
+          <option value="round">Mesa redonda</option>
+          <option value="table">Tablón</option>
+          <option value="space">Espacio</option>
+        </select>
+      </label>
+      <label>Sillas adicionales
+        <input id="editIslandChairs" type="number" min="0" value="0">
+      </label>
+      <label>Espacios adicionales
+        <input id="editIslandExtra" type="number" min="0" value="0">
+      </label>
+      <div class="full assign-actions">
+        <button class="action soft" id="saveIslandSlotEdit">Guardar cambios</button>
+        <button class="action alt" id="changeIslandEntrepreneur">Cambiar emprendedor</button>
+        <button class="action ghost" id="removeIslandEntrepreneur">Quitar emprendedor</button>
       </div>
     </div>
   </div>
@@ -792,12 +833,118 @@ function nextIslandNumber(){
   return nums.length?Math.max(...nums)+1:1;
 }
 
+
+let editingIslandId=null, editingIslandSlotIndex=null;
+
+function openIslandSlotEditor(islandId,slotIndex){
+  const island=currentLayout().find(x=>x.kind==="island" && x.id===islandId);
+  if(!island)return;
+  const slot=island.slots?.[slotIndex];
+  if(!slot || !slot.exhibitorId)return;
+  const p=participantById(slot.exhibitorId);
+  editingIslandId=islandId;
+  editingIslandSlotIndex=slotIndex;
+
+  editIslandSlotLabel.textContent=`Isla ${island.number||"?"} - Puesto ${slotIndex+1}`;
+  editIslandType.value=slot.type||typeFromOption(p?.participation?.option||"");
+  editIslandChairs.value=slot.chairsOverride!=null?Number(slot.chairsOverride):Number(p?.participation?.extraChair||0);
+  editIslandExtra.value=slot.extraOverride!=null?Number(slot.extraOverride):Number(p?.participation?.extraSpace||0);
+
+  editIslandSlotModal.classList.add("open");
+}
+
+function closeIslandSlotEditor(){
+  editIslandSlotModal.classList.remove("open");
+  editingIslandId=null;
+  editingIslandSlotIndex=null;
+}
+closeEditIslandSlot.onclick=closeIslandSlotEditor;
+editIslandSlotModal.onclick=e=>{if(e.target===editIslandSlotModal)closeIslandSlotEditor()};
+
+saveIslandSlotEdit.onclick=()=>{
+  const island=currentLayout().find(x=>x.kind==="island" && x.id===editingIslandId);
+  const slot=island?.slots?.[editingIslandSlotIndex];
+  if(!slot)return;
+  slot.type=editIslandType.value;
+  slot.chairsOverride=Math.max(0,Number(editIslandChairs.value||0));
+  slot.extraOverride=Math.max(0,Number(editIslandExtra.value||0));
+  saveAll();closeIslandSlotEditor();renderMesas();
+};
+
+removeIslandEntrepreneur.onclick=()=>{
+  const island=currentLayout().find(x=>x.kind==="island" && x.id===editingIslandId);
+  const slot=island?.slots?.[editingIslandSlotIndex];
+  if(!slot?.exhibitorId)return;
+  const eid=slot.exhibitorId;
+  clearIslandPerson(island,eid);
+  closeIslandSlotEditor();
+};
+
+changeIslandEntrepreneur.onclick=()=>{
+  const island=currentLayout().find(x=>x.kind==="island" && x.id===editingIslandId);
+  const slot=island?.slots?.[editingIslandSlotIndex];
+  if(!island||!slot)return;
+
+  const oldId=slot.exhibitorId;
+  if(oldId) clearIslandPerson(island,oldId);
+
+  const targetIndex=editingIslandSlotIndex;
+  closeIslandSlotEditor();
+
+  const arr=availableQueue();
+  if(!arr.length){alert("No quedan emprendedores pendientes.");return}
+
+  let picker=0;
+  const modal=document.createElement("div");
+  modal.className="assign-modal open";
+  modal.innerHTML=`<div class="assign-card">
+    <div class="row">
+      <div><h3 style="margin:0">Elegir emprendedor</h3><div class="muted small">Para Isla ${island.number||"?"} - Puesto ${targetIndex+1}</div></div>
+      <button class="action ghost" data-close>Cerrar</button>
+    </div>
+    <div data-box style="margin-top:12px"></div>
+    <div class="assign-actions">
+      <button class="action ghost" data-prev>← Anterior</button>
+      <button class="action alt" data-next>Saltar →</button>
+      <button class="action soft" data-assign>Asignar</button>
+    </div>
+  </div>`;
+  document.body.appendChild(modal);
+
+  const render=()=>{
+    const a=availableQueue();
+    if(!a.length){modal.querySelector("[data-box]").innerHTML='<div class="notice">No quedan emprendedores pendientes.</div>';return}
+    if(picker>=a.length)picker=0;
+    const p=a[picker];
+    modal.querySelector("[data-box]").innerHTML=`<div class="assign-person"><h3 style="margin:0 0 5px">${p.name}</h3><div><b>${p.venture||"Sin emprendimiento"}</b></div><div class="muted small">${p.participation?.option||""}</div></div>`;
+  };
+  render();
+
+  modal.querySelector("[data-close]").onclick=()=>modal.remove();
+  modal.querySelector("[data-next]").onclick=()=>{const a=availableQueue();if(a.length){picker=(picker+1)%a.length;render()}};
+  modal.querySelector("[data-prev]").onclick=()=>{const a=availableQueue();if(a.length){picker=(picker-1+a.length)%a.length;render()}};
+  modal.querySelector("[data-assign]").onclick=()=>{
+    const a=availableQueue(),p=a[picker];
+    if(!p)return;
+    if(assignToIslandSlot(island,targetIndex,p)){
+      // override values begin from selected entrepreneur's inscription
+      const primarySlot=island.slots[targetIndex];
+      if(primarySlot){
+        primarySlot.type=typeFromOption(p.participation?.option||"");
+        primarySlot.chairsOverride=Number(p.participation?.extraChair||0);
+        primarySlot.extraOverride=Number(p.participation?.extraSpace||0);
+      }
+      saveAll();modal.remove();renderMesas();
+    }
+  };
+}
+
 function renderIsland(island){
  if(!island.number)island.number=String(nextIslandNumber());
  const d=islandDims(island), wrap=document.createElement("div");wrap.className="island"+(island.locked?" locked":"");
  const islandNum=document.createElement("div");
  islandNum.className="island-number";
- islandNum.textContent="I"+(island.number||"?");
+ islandNum.textContent="Isla "+(island.number||"?");
  islandNum.title="Doble clic para cambiar número de isla";
  islandNum.ondblclick=e=>{
    e.stopPropagation();
@@ -821,9 +968,11 @@ wrap.dataset.islandId=island.id;wrap.style.left=island.x+"px";wrap.style.top=isl
    el.dataset.type=slotType;
    if(slot.exhibitorId){
      if(slot.primary!==false){
-       el.innerHTML=`<span class="island-slot-number">${i+1}</span><button class="slot-remove">×</button><div class="island-type-badge"><span class="island-type-icon ${slotType}"></span>${labelType(slotType)}</div><div style="padding-top:14px">${p?.name||"—"}<br><span style="font-weight:600">${p?.venture||""}</span></div>`;
+       el.innerHTML=`<span class="island-slot-number">${i+1}</span><button class="slot-remove">×</button><button class="island-slot-edit" type="button" title="Editar puesto">✎</button><div class="island-type-badge"><span class="island-type-icon ${slotType}"></span>${labelType(slotType)}</div><div style="padding-top:14px">${p?.name||"—"}<br><span style="font-weight:600">${p?.venture||""}</span></div>`;
        el.querySelector('.slot-remove').onclick=ev=>{ev.stopPropagation();clearIslandPerson(island,slot.exhibitorId)};
-       renderChairs(el,Number(p?.participation?.extraChair||0),slotType);
+       el.querySelector('.island-slot-edit').onclick=ev=>{ev.stopPropagation();openIslandSlotEditor(island.id,i)};
+       const islandChairs=slot.chairsOverride!=null?Number(slot.chairsOverride):Number(p?.participation?.extraChair||0);
+       renderChairs(el,islandChairs,slotType);
      }else{
        el.innerHTML=`<span class="island-slot-number">${i+1}</span><div class="island-type-badge"><span class="island-type-icon ${slotType}"></span>${labelType(slotType)}</div><div style="padding-top:14px">+ espacio adicional</div>`;
      }
@@ -1147,10 +1296,10 @@ function locationRows(){
        const p=participantById(s.exhibitorId);
        rows.push({
          p,
-         type:`${labelType(typeFromOption(p?.participation?.option||""))}`,
+         type:labelType(typeFromOption(p?.participation?.option||"")),
          number:`Isla ${t.number||"?"} - Puesto ${idx+1}`,
-         extraSpace:Number(p?.participation?.extraSpace||0),
-         extraChair:Number(p?.participation?.extraChair||0),
+         extraSpace:s.extraOverride!=null?Number(s.extraOverride):Number(p?.participation?.extraSpace||0),
+         extraChair:s.chairsOverride!=null?Number(s.chairsOverride):Number(p?.participation?.extraChair||0),
          sortNumber:10000+(Number(t.number)||0)*100+idx
        });
      });
